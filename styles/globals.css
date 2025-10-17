@@ -1,0 +1,302 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Pure premium whites and vibrant purples - NO GRAYS/BLACKS */
+  --background: oklch(99.5% 0.01 280); /* Subtle purple-tinted white */
+  --foreground: oklch(25% 0.15 280); /* Deep indigo, NOT black */
+  
+  --card: oklch(100% 0 0); /* Pure white cards */
+  --card-foreground: oklch(20% 0.18 285);
+  
+  --popover: oklch(100% 0 0);
+  --popover-foreground: oklch(20% 0.18 285);
+  
+  /* Logo purples - vibrant and bold */
+  --primary: oklch(58% 0.28 295); /* Rich purple from logo */
+  --primary-foreground: oklch(100% 0 0);
+  
+  --secondary: oklch(96% 0.02 280); /* Lightest purple tint */
+  --secondary-foreground: oklch(25% 0.15 285);
+  
+  --muted: oklch(95% 0.03 280); /* Very light purple bg */
+  --muted-foreground: oklch(40% 0.12 285); /* Medium purple-gray */
+  
+  /* Accent from logo's cyan-blue glow */
+  --accent: oklch(65% 0.22 260); /* Bright blue-purple */
+  --accent-foreground: oklch(100% 0 0);
+  
+  --destructive: oklch(62% 0.24 15); /* Warm red with purple undertone */
+  --destructive-foreground: oklch(100% 0 0);
+  
+  --border: oklch(92% 0.04 280); /* Subtle purple border */
+  --input: oklch(98% 0.02 280);
+  --ring: oklch(58% 0.28 295); /* Primary purple for focus */
+  
+  /* Chart colors - all from purple-blue spectrum */
+  --chart-1: oklch(62% 0.26 300);
+  --chart-2: oklch(68% 0.24 270);
+  --chart-3: oklch(60% 0.28 310);
+  --chart-4: oklch(70% 0.20 255);
+  --chart-5: oklch(65% 0.22 290);
+  
+  --radius: 0.875rem; /* Slightly rounder for premium feel */
+  
+  /* Sidebar */
+  --sidebar: oklch(100% 0 0);
+  --sidebar-foreground: oklch(25% 0.15 285);
+  --sidebar-primary: oklch(58% 0.28 295);
+  --sidebar-primary-foreground: oklch(100% 0 0);
+  --sidebar-accent: oklch(96% 0.02 280);
+  --sidebar-accent-foreground: oklch(25% 0.15 285);
+  --sidebar-border: oklch(92% 0.04 280);
+  --sidebar-ring: oklch(58% 0.28 295);
+  
+  /* Premium glow effects */
+  --glow-primary: 0 0 30px rgba(124, 58, 237, 0.4), 0 0 60px rgba(124, 58, 237, 0.2);
+  --glow-accent: 0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2);
+  --shadow-elevated: 0 20px 40px -10px rgba(107, 78, 255, 0.15);
+  --shadow-card: 0 4px 20px rgba(107, 78, 255, 0.08);
+  --shadow-card-hover: 0 10px 40px -5px rgba(107, 78, 255, 0.15); /* Enhanced for hover */
+}
+
+.dark {
+  /* Deep purple-navy, NO flat blacks */
+  --background: oklch(18% 0.06 285); /* Rich dark purple-navy */
+  --foreground: oklch(98% 0.01 280); /* Bright white with purple hint */
+  
+  --card: oklch(22% 0.05 285); /* Elevated purple-dark cards */
+  --card-foreground: oklch(98% 0.01 280);
+  
+  --popover: oklch(22% 0.05 285);
+  --popover-foreground: oklch(98% 0.01 280);
+  
+  /* Brighter purples for dark mode pop */
+  --primary: oklch(72% 0.22 295); /* Glowing purple */
+  --primary-foreground: oklch(15% 0.08 285);
+  
+  --secondary: oklch(28% 0.06 285);
+  --secondary-foreground: oklch(98% 0.01 280);
+  
+  --muted: oklch(28% 0.06 285);
+  --muted-foreground: oklch(75% 0.05 280); /* Light purple-white */
+  
+  --accent: oklch(75% 0.18 265); /* Bright cyan-blue accent */
+  --accent-foreground: oklch(15% 0.08 285);
+  
+  --destructive: oklch(58% 0.20 15);
+  --destructive-foreground: oklch(98% 0.01 280);
+  
+  --border: oklch(35% 0.04 285); /* Visible purple borders */
+  --input: oklch(28% 0.06 285);
+  --ring: oklch(72% 0.22 295);
+  
+  --chart-1: oklch(68% 0.24 300);
+  --chart-2: oklch(72% 0.20 270);
+  --chart-3: oklch(65% 0.26 310);
+  --chart-4: oklch(75% 0.16 255);
+  --chart-5: oklch(70% 0.20 290);
+  
+  --sidebar: oklch(20% 0.07 285);
+  --sidebar-foreground: oklch(98% 0.01 280);
+  --sidebar-primary: oklch(72% 0.22 295);
+  --sidebar-primary-foreground: oklch(98% 0.01 280);
+  --sidebar-accent: oklch(28% 0.06 285);
+  --sidebar-accent-foreground: oklch(98% 0.01 280);
+  --sidebar-border: oklch(35% 0.04 285);
+  --sidebar-ring: oklch(72% 0.22 295);
+  
+  /* Stronger glows for dark mode */
+  --glow-primary: 0 0 40px rgba(168, 85, 247, 0.6), 0 0 80px rgba(168, 85, 247, 0.3);
+  --glow-accent: 0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3);
+  --shadow-elevated: 0 20px 60px -10px rgba(168, 85, 247, 0.4);
+  --shadow-card: 0 4px 30px rgba(168, 85, 247, 0.2);
+  --shadow-card-hover: 0 15px 50px -5px rgba(168, 85, 247, 0.3); /* Enhanced for hover */
+}
+
+@theme inline {
+  --font-sans: 'Geist', 'Geist Fallback', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback', 'Courier New', monospace;
+  
+  /* Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  
+  /* Radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+  --radius-2xl: calc(var(--radius) + 12px);
+  
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* Custom glow/shadow utilities - fully theme-aware for @apply */
+  --shadow-glow-primary: var(--glow-primary);
+  --shadow-glow-accent: var(--glow-accent);
+  --shadow-glow-card: var(--shadow-card);
+  --shadow-glow-card-hover: var(--shadow-card-hover); /* Directly fixes the error */
+  --shadow-glow-elevated: var(--shadow-elevated);
+  /* Dedicated hover shadows (for hover:shadow-* variants) */
+  --shadow-glow-primary-hover: 0 15px 50px -5px rgba(124, 58, 237, 0.6);
+  --shadow-glow-accent-hover: 0 15px 50px -5px rgba(139, 92, 246, 0.6);
+  .dark & {
+    --shadow-glow-primary-hover: 0 20px 60px -5px rgba(168, 85, 247, 0.7);
+    --shadow-glow-accent-hover: 0 20px 60px -5px rgba(139, 92, 246, 0.7);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+    font-variation-settings: 'opsz' auto;
+  }
+  
+  /* Premium glassmorphism */
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(168, 85, 247, 0.15);
+    box-shadow: 0 8px 32px rgba(107, 78, 255, 0.08);
+  }
+  
+  .dark .glass {
+    background: rgba(34, 20, 60, 0.6); /* Purple-tinted, not gray */
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    box-shadow: 0 8px 32px rgba(168, 85, 247, 0.15);
+  }
+  
+  /* Stronger glass for elevated sections */
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    @apply shadow-glow-card; /* Valid theme utility */
+  }
+  
+  .dark .glass-strong {
+    background: rgba(34, 20, 60, 0.8);
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    @apply shadow-glow-card; /* Auto-switches via dark vars */
+  }
+  
+  /* Glow effects - now pure utilities */
+  .glow-primary {
+    @apply shadow-glow-primary; /* Replaces manual definition */
+  }
+  
+  /* Interactive card states */
+  .card-interactive {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .card-interactive:hover {
+    transform: translateY(-4px) scale(1.01);
+    @apply shadow-glow-card-hover; /* Now fully valid - resolves error */
+  }
+  
+  .card-interactive:active {
+    transform: translateY(-2px) scale(1.005);
+  }
+  
+  /* Logo glow animation */
+  .drop-shadow-glow-primary {
+    filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.6));
+  }
+  
+  /* Smooth transitions */
+  .glass,
+  .glass-strong,
+  .card-interactive {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Fix text visibility on aurora backgrounds */
+  .text-balance,
+  .text-pretty {
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dark .text-balance,
+  .dark .text-pretty {
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+  }
+  
+  /* Premium gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, 
+      oklch(58% 0.28 295) 0%, 
+      oklch(65% 0.22 260) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Fade-in animation */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out forwards;
+    opacity: 0;
+  }
+  
+  /* Pulse animation for logo/CTAs */
+  @keyframes pulse-glow {
+    0%, 100% {
+      filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.6));
+    }
+    50% {
+      filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.9));
+    }
+  }
+  
+  .animate-pulse {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+}
