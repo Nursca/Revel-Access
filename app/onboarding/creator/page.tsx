@@ -174,10 +174,23 @@ export default function CreatorOnboardingPage() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!isConnected || !address || !supabase || !formData.display_name.trim()) {
-      toast.error('Connect wallet and add display name')
+    
+    if (!isConnected || !address) {
+      toast.error('Please connect your wallet')
+      return
+    }
+    
+    if (!formData.display_name.trim()) {
+      toast.error('Display name is required')
+      return
+    }
+
+    const supabase = getSupabaseBrowserClient()
+    
+    if (!supabase) {
+      toast.error('Database connection failed - check console for details')
       return
     }
 
@@ -194,30 +207,48 @@ export default function CreatorOnboardingPage() {
       social_links: formData.social_links,
     }
 
+    console.log('📤 Attempting upsert with data:', userData)
+
     try {
+      // Test connection first with a simple query
+      const { data: testData, error: testError } = await supabase
+        .from('users')
+        .select('count')
+        .limit(1)
+
+      console.log('🔍 Test query result:', { testData, testError })
+
+      if (testError) {
+        console.error('❌ Test query failed:', testError)
+        toast.error(`Database connection failed: ${testError.message}`)
+        setIsLoading(false)
+        return
+      }
+
+      // Now try the actual upsert
       const { data, error } = await supabase
         .from('users')
         .upsert(userData, { onConflict: 'wallet_address' })
         .select()
 
-      console.log('Upsert response:', { data, error })
+      console.log('📥 Upsert response:', { data, error })
 
       if (error) {
-        console.error('Supabase upsert error:', error)
-        toast.error(`Save failed: ${error.message || 'Unknown error'}`)
+        console.error('❌ Supabase upsert error:', error)
+        toast.error(`Save failed: ${error.message}`)
         return
       }
 
       if (data && data.length > 0) {
-        console.log('Profile saved:', data[0])
+        console.log('✅ Profile saved:', data[0])
         toast.success('Creator profile saved successfully!')
-        setIsComplete(true) // Trigger useEffect for replace
+        setIsComplete(true)
       } else {
         toast.error('No data returned—check RLS policies')
       }
     } catch (fetchError) {
-      console.error('Network error saving profile:', fetchError)
-      toast.error('Network issue—check connection and Supabase keys')
+      console.error('❌ Network error:', fetchError)
+      toast.error('Network issue—check browser console')
     } finally {
       setIsLoading(false)
     }
