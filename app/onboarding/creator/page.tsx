@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Upload, Loader2, X, User, Image, Link2, Zap } from "lucide-react"
+import { Upload, Loader2, X, User, Image, Link2, Zap, ChevronLeft, ChevronRight } from "lucide-react"
 import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -58,14 +58,12 @@ export default function CreatorOnboardingPage() {
 
   useEffect(() => {
     if (isComplete) {
-      // Set localStorage flag to prevent re-onboarding
       localStorage.setItem('revel_onboarding_complete', 'true')
       router.replace("/dashboard")
     }
   }, [isComplete, router])
 
   useEffect(() => {
-    // Check localStorage to skip if complete
     if (localStorage.getItem('revel_onboarding_complete')) {
       router.replace("/dashboard")
       return
@@ -162,7 +160,38 @@ export default function CreatorOnboardingPage() {
     toast.success('Image removed')
   }
 
+  const validateStep = (step: number): boolean => {
+    switch (step) {
+      case 1:
+        if (!formData.display_name.trim()) {
+          toast.error('Display name is required')
+          return false
+        }
+        if (!formData.bio.trim()) {
+          toast.error('Bio is required')
+          return false
+        }
+        return true
+      case 3:
+        if (!formData.zora_creator_coin_address.trim()) {
+          toast.error('Zora Creator Coin address is required')
+          return false
+        }
+        if (!formData.zora_creator_coin_address.startsWith('0x')) {
+          toast.error('Invalid address format')
+          return false
+        }
+        return true
+      default:
+        return true
+    }
+  }
+
   const handleNextStep = () => {
+    if (!validateStep(currentStep)) {
+      return
+    }
+    
     if (currentStep < STEPS.length) {
       setCurrentStep(prev => prev + 1)
     }
@@ -174,9 +203,7 @@ export default function CreatorOnboardingPage() {
     }
   }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+  const handleSubmit = async () => {
     if (!isConnected || !address) {
       toast.error('Please connect your wallet')
       return
@@ -210,7 +237,6 @@ export default function CreatorOnboardingPage() {
     console.log('📤 Attempting upsert with data:', userData)
 
     try {
-      // Test connection first with a simple query
       const { data: testData, error: testError } = await supabase
         .from('users')
         .select('count')
@@ -225,7 +251,6 @@ export default function CreatorOnboardingPage() {
         return
       }
 
-      // Now try the actual upsert
       const { data, error } = await supabase
         .from('users')
         .upsert(userData, { onConflict: 'wallet_address' })
@@ -257,41 +282,52 @@ export default function CreatorOnboardingPage() {
   const activeStep = STEPS[currentStep - 1]
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen overflow-x-hidden">
       <AuroraBackground />
       <Navigation />
 
-      <div className="relative z-10 px-4 py-24">
-        <div className="mx-auto max-w-2xl">
+      <div className="relative z-10 px-4 py-24 max-w-full">
+        <div className="mx-auto max-w-2xl w-full">
           <div className="mb-8 text-center">
-            <h1 className="mb-2 text-4xl font-bold">Set Up Your Creator Profile</h1>
-            <p className="text-muted-foreground">Tell your fans about yourself and your content</p>
+            <h1 className="mb-2 text-3xl md:text-4xl font-bold">Set Up Your Creator Profile</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Tell your fans about yourself and your content</p>
           </div>
 
           {/* Progress Bar */}
           <div className="mb-8">
-            <div className="flex justify-between text-sm text-muted-foreground mb-2">
+            <div className="flex justify-between mb-4">
               {STEPS.map((step) => (
-                <div key={step.id} className="flex flex-col items-center">
-                  <div className={`w-2 h-2 rounded-full ${step.id <= currentStep ? 'bg-primary' : 'bg-muted'}`} />
-                  <span className="mt-1 text-xs">{step.id}</span>
+                <div key={step.id} className="flex flex-col items-center flex-1">
+                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all ${
+                    step.id < currentStep 
+                      ? 'bg-primary text-background' 
+                      : step.id === currentStep 
+                      ? 'bg-primary text-background ring-2 ring-primary ring-offset-2 ring-offset-background' 
+                      : 'bg-muted text-muted-foreground'
+                  }`}>
+                    <step.icon className="h-4 w-4 md:h-5 md:w-5" />
+                  </div>
+                  <span className="mt-2 text-xs md:text-sm font-medium hidden sm:block">{step.title}</span>
                 </div>
               ))}
             </div>
-            <div className="h-1 bg-muted rounded-full">
-              <div className="h-1 bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-300" style={{ width: `${(currentStep / STEPS.length) * 100}%` }} />
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-300 ease-out" 
+                style={{ width: `${(currentStep / STEPS.length) * 100}%` }} 
+              />
             </div>
-            <p className="text-center text-sm font-medium mt-2">{activeStep.title}</p>
+            <p className="text-center text-sm font-medium mt-3 text-primary">{activeStep.title}</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="glass-strong space-y-6 rounded-3xl p-6 md:p-8">
+          <div className="glass-strong space-y-6 rounded-2xl md:rounded-3xl p-4 md:p-8">
             {/* Step 1: Personal Info */}
             {currentStep === 1 && (
               <Card className="glass-strong border-0">
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-2">
                     <User className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-lg">Personal Info</CardTitle>
+                    <CardTitle className="text-base md:text-lg">Personal Info</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -302,7 +338,6 @@ export default function CreatorOnboardingPage() {
                       placeholder="Your creator name"
                       value={formData.display_name}
                       onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
-                      required
                       className="glass border-border bg-surface"
                     />
                   </div>
@@ -313,7 +348,6 @@ export default function CreatorOnboardingPage() {
                       placeholder="Tell your fans about yourself and what you create..."
                       value={formData.bio}
                       onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                      required
                       rows={4}
                       className="glass border-border bg-surface resize-none"
                     />
@@ -328,21 +362,31 @@ export default function CreatorOnboardingPage() {
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-2">
                     <Image className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-lg">Images</CardTitle>
+                    <CardTitle className="text-base md:text-lg">Images</CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
+                <CardContent className="space-y-6">
+                  <div className="space-y-3">
                     <Label>Profile Image</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleFileUpload(e, 'profile')}
-                        className="glass border-border bg-surface file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-background hover:file:bg-primary-hover"
-                      />
-                      <Button type="button" variant="outline" size="icon" onClick={() => triggerFileInput('profile')} disabled={uploadLoading.profile} className="glass shrink-0 bg-transparent">
-                        {uploadLoading.profile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => triggerFileInput('profile')} 
+                        disabled={uploadLoading.profile} 
+                        className="glass w-full sm:flex-1 justify-center bg-transparent"
+                      >
+                        {uploadLoading.profile ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="mr-2 h-4 w-4" />
+                            Choose Profile Image
+                          </>
+                        )}
                       </Button>
                     </div>
                     <input
@@ -353,32 +397,43 @@ export default function CreatorOnboardingPage() {
                       className="hidden"
                     />
                     {preview.profile && (
-                      <div className="relative mt-2">
-                        <img src={preview.profile} alt="Profile Preview" className="h-24 w-24 rounded-full object-cover border" />
+                      <div className="relative inline-block mt-3">
+                        <img src={preview.profile} alt="Profile Preview" className="h-32 w-32 rounded-full object-cover border-2 border-border" />
                         <Button
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground"
+                          className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           onClick={() => handleRemovePreview('profile')}
                         >
-                          <X className="h-3 w-3" />
+                          <X className="h-4 w-4" />
                         </Button>
                       </div>
                     )}
                     <p className="text-xs text-muted-foreground">Recommended: 400x400px, JPG or PNG</p>
                   </div>
-                  <div className="space-y-2">
+                  
+                  <div className="space-y-3">
                     <Label>Cover Image</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleFileUpload(e, 'cover')}
-                        className="glass border-border bg-surface file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-background hover:file:bg-primary-hover"
-                      />
-                      <Button type="button" variant="outline" size="icon" onClick={() => triggerFileInput('cover')} disabled={uploadLoading.cover} className="glass shrink-0 bg-transparent">
-                        {uploadLoading.cover ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => triggerFileInput('cover')} 
+                        disabled={uploadLoading.cover} 
+                        className="glass w-full sm:flex-1 justify-center bg-transparent"
+                      >
+                        {uploadLoading.cover ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="mr-2 h-4 w-4" />
+                            Choose Cover Image
+                          </>
+                        )}
                       </Button>
                     </div>
                     <input
@@ -389,16 +444,16 @@ export default function CreatorOnboardingPage() {
                       className="hidden"
                     />
                     {preview.cover && (
-                      <div className="relative mt-2">
-                        <img src={preview.cover} alt="Cover Preview" className="h-24 w-full rounded object-cover border" />
+                      <div className="relative inline-block mt-3 w-full">
+                        <img src={preview.cover} alt="Cover Preview" className="h-32 w-full rounded-lg object-cover border-2 border-border" />
                         <Button
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground"
+                          className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           onClick={() => handleRemovePreview('cover')}
                         >
-                          <X className="h-3 w-3" />
+                          <X className="h-4 w-4" />
                         </Button>
                       </div>
                     )}
@@ -414,7 +469,7 @@ export default function CreatorOnboardingPage() {
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-2">
                     <Zap className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-lg">Zora Creator Coin</CardTitle>
+                    <CardTitle className="text-base md:text-lg">Zora Creator Coin</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -425,7 +480,6 @@ export default function CreatorOnboardingPage() {
                       placeholder="0x..."
                       value={formData.zora_creator_coin_address}
                       onChange={(e) => setFormData({ ...formData, zora_creator_coin_address: e.target.value })}
-                      required
                       className="glass border-border bg-surface"
                     />
                     <p className="text-xs text-muted-foreground">
@@ -442,13 +496,15 @@ export default function CreatorOnboardingPage() {
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-2">
                     <Link2 className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-lg">Social Links</CardTitle>
+                    <CardTitle className="text-base md:text-lg">Social Links (Optional)</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
+                    <Label htmlFor="twitter">Twitter/X</Label>
                     <Input
-                      placeholder="Twitter/X username"
+                      id="twitter"
+                      placeholder="@username"
                       value={formData.social_links.twitter}
                       onChange={(e) =>
                         setFormData({
@@ -460,8 +516,10 @@ export default function CreatorOnboardingPage() {
                     />
                   </div>
                   <div className="space-y-2">
+                    <Label htmlFor="instagram">Instagram</Label>
                     <Input
-                      placeholder="Instagram username"
+                      id="instagram"
+                      placeholder="@username"
                       value={formData.social_links.instagram}
                       onChange={(e) =>
                         setFormData({
@@ -473,8 +531,10 @@ export default function CreatorOnboardingPage() {
                     />
                   </div>
                   <div className="space-y-2">
+                    <Label htmlFor="website">Website</Label>
                     <Input
-                      placeholder="Website URL"
+                      id="website"
+                      placeholder="https://yoursite.com"
                       value={formData.social_links.website}
                       onChange={(e) =>
                         setFormData({
@@ -490,24 +550,29 @@ export default function CreatorOnboardingPage() {
             )}
 
             {/* Navigation Buttons */}
-            <div className="flex justify-between pt-4">
-              {currentStep > 1 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handlePrevStep}
-                  className="rounded-full"
-                >
-                  Back
-                </Button>
-              )}
-              <div className="flex-1" />
+            <div className="flex justify-between items-center pt-4 gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handlePrevStep}
+                disabled={currentStep === 1}
+                className="rounded-full px-4 md:px-6"
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Back</span>
+              </Button>
+              
               {currentStep === STEPS.length ? (
-                <Button type="submit" disabled={isLoading} className="rounded-full bg-gradient-to-r from-primary to-accent px-8">
+                <Button 
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isLoading} 
+                  className="rounded-full bg-gradient-to-r from-primary to-accent px-6 md:px-8 flex-1 sm:flex-initial"
+                >
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Complete Setup
+                      Completing...
                     </>
                   ) : (
                     "Complete Setup"
@@ -517,13 +582,15 @@ export default function CreatorOnboardingPage() {
                 <Button
                   type="button"
                   onClick={handleNextStep}
-                  className="rounded-full bg-gradient-to-r from-primary to-accent px-8 cursor-pointer"
+                  className="rounded-full bg-gradient-to-r from-primary to-accent px-6 md:px-8 flex-1 sm:flex-initial"
                 >
-                  Next Step
+                  <span className="hidden sm:inline">Next Step</span>
+                  <span className="sm:hidden">Next</span>
+                  <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               )}
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>

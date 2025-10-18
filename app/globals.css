@@ -4,121 +4,118 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Immersive premium purples - deeper saturation throughout */
-  --background: oklch(97% 0.04 290); /* Purple-infused canvas */
-  --foreground: oklch(20% 0.20 290); /* Rich purple text */
+  /* Pure premium whites and vibrant purples */
+  --background: oklch(99.5% 0.01 280);
+  --foreground: oklch(25% 0.15 280);
   
-  --card: oklch(98% 0.03 290); /* Tinted purple cards */
-  --card-foreground: oklch(16% 0.22 295);
+  --card: oklch(100% 0 0);
+  --card-foreground: oklch(20% 0.18 285);
   
-  --popover: oklch(98% 0.03 290);
-  --popover-foreground: oklch(16% 0.22 295);
+  --popover: oklch(100% 0 0);
+  --popover-foreground: oklch(20% 0.18 285);
   
-  /* Hyper-vibrant logo purples */
-  --primary: oklch(52% 0.36 295); /* Ultra-saturated purple core */
+  --primary: oklch(58% 0.28 295);
   --primary-foreground: oklch(100% 0 0);
   
-  --secondary: oklch(92% 0.05 290); /* Deep purple haze */
-  --secondary-foreground: oklch(20% 0.20 295);
+  --secondary: oklch(96% 0.02 280);
+  --secondary-foreground: oklch(25% 0.15 285);
   
-  --muted: oklch(91% 0.06 290); /* Purple-shrouded subtle */
-  --muted-foreground: oklch(28% 0.16 295); /* Purple depth text */
+  --muted: oklch(95% 0.03 280);
+  --muted-foreground: oklch(40% 0.12 285);
   
-  /* Deep purple accent fusion */
-  --accent: oklch(58% 0.30 280); /* Intense purple-blue */
+  --accent: oklch(65% 0.22 260);
   --accent-foreground: oklch(100% 0 0);
   
-  --destructive: oklch(55% 0.30 25); /* Purple-crimson alert */
+  --destructive: oklch(62% 0.24 15);
   --destructive-foreground: oklch(100% 0 0);
   
-  --border: oklch(85% 0.07 290); /* Pronounced purple lines */
-  --input: oklch(95% 0.05 290);
-  --ring: oklch(52% 0.36 295); /* Electric purple ring */
+  --border: oklch(92% 0.04 280);
+  --input: oklch(98% 0.02 280);
+  --ring: oklch(58% 0.28 295);
   
-  /* Purple galaxy chart palette */
-  --chart-1: oklch(54% 0.34 310);
-  --chart-2: oklch(60% 0.32 285);
-  --chart-3: oklch(52% 0.36 300);
-  --chart-4: oklch(62% 0.30 275);
-  --chart-5: oklch(56% 0.34 310);
+  --chart-1: oklch(62% 0.26 300);
+  --chart-2: oklch(68% 0.24 270);
+  --chart-3: oklch(60% 0.28 310);
+  --chart-4: oklch(70% 0.20 255);
+  --chart-5: oklch(65% 0.22 290);
   
-  --radius: 1.125rem; /* Softer, cosmic roundness */
+  --radius: 0.875rem;
   
-  /* Cosmic purple sidebar */
-  --sidebar: oklch(98% 0.03 290);
-  --sidebar-foreground: oklch(20% 0.20 295);
-  --sidebar-primary: oklch(52% 0.36 295);
+  --sidebar: oklch(100% 0 0);
+  --sidebar-foreground: oklch(25% 0.15 285);
+  --sidebar-primary: oklch(58% 0.28 295);
   --sidebar-primary-foreground: oklch(100% 0 0);
-  --sidebar-accent: oklch(92% 0.05 290);
-  --sidebar-accent-foreground: oklch(20% 0.20 295);
-  --sidebar-border: oklch(85% 0.07 290);
-  --sidebar-ring: oklch(52% 0.36 295);
+  --sidebar-accent: oklch(96% 0.02 280);
+  --sidebar-accent-foreground: oklch(25% 0.15 285);
+  --sidebar-border: oklch(92% 0.04 280);
+  --sidebar-ring: oklch(58% 0.28 295);
   
-  /* Nebula-like glows and shadows */
-  --glow-primary: 0 0 40px rgba(139, 37, 226, 0.6), 0 0 80px rgba(139, 37, 226, 0.3);
-  --glow-accent: 0 0 40px rgba(109, 40, 217, 0.6), 0 0 80px rgba(109, 40, 217, 0.3);
-  --shadow-elevated: 0 30px 60px -20px rgba(139, 37, 226, 0.2);
-  --shadow-card: 0 8px 30px rgba(139, 37, 226, 0.12);
+  --glow-primary: 0 0 30px rgba(124, 58, 237, 0.4), 0 0 60px rgba(124, 58, 237, 0.2);
+  --glow-accent: 0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2);
+  --shadow-elevated: 0 20px 40px -10px rgba(107, 78, 255, 0.15);
+  --shadow-card: 0 4px 20px rgba(107, 78, 255, 0.08);
+  --shadow-card-hover: 0 10px 40px -5px rgba(107, 78, 255, 0.15);
+  --shadow-glow-primary-hover: 0 15px 50px -5px rgba(124, 58, 237, 0.6);
+  --shadow-glow-accent-hover: 0 15px 50px -5px rgba(139, 92, 246, 0.6);
 }
 
 .dark {
-  /* Purple void immersion */
-  --background: oklch(12% 0.12 295); /* Abyss purple base */
-  --foreground: oklch(99.5% 0.03 290); /* Ethereal white */
+  --background: oklch(18% 0.06 285);
+  --foreground: oklch(98% 0.01 280);
   
-  --card: oklch(15% 0.11 295); /* Void-purple cards */
-  --card-foreground: oklch(99.5% 0.03 290);
+  --card: oklch(22% 0.05 285);
+  --card-foreground: oklch(98% 0.01 280);
   
-  --popover: oklch(15% 0.11 295);
-  --popover-foreground: oklch(99.5% 0.03 290);
+  --popover: oklch(22% 0.05 285);
+  --popover-foreground: oklch(98% 0.01 280);
   
-  /* Radiant purple bursts */
-  --primary: oklch(65% 0.32 295); /* Luminous purple */
-  --primary-foreground: oklch(8% 0.14 295);
+  --primary: oklch(72% 0.22 295);
+  --primary-foreground: oklch(15% 0.08 285);
   
-  --secondary: oklch(18% 0.12 295);
-  --secondary-foreground: oklch(99.5% 0.03 290);
+  --secondary: oklch(28% 0.06 285);
+  --secondary-foreground: oklch(98% 0.01 280);
   
-  --muted: oklch(18% 0.12 295);
-  --muted-foreground: oklch(60% 0.10 290); /* Purple glow text */
+  --muted: oklch(28% 0.06 285);
+  --muted-foreground: oklch(75% 0.05 280);
   
-  --accent: oklch(66% 0.28 285); /* Nebula accent */
-  --accent-foreground: oklch(8% 0.14 295);
+  --accent: oklch(75% 0.18 265);
+  --accent-foreground: oklch(15% 0.08 285);
   
-  --destructive: oklch(48% 0.28 30);
-  --destructive-foreground: oklch(99.5% 0.03 290);
+  --destructive: oklch(58% 0.20 15);
+  --destructive-foreground: oklch(98% 0.01 280);
   
-  --border: oklch(25% 0.10 295); /* Glowing purple edges */
-  --input: oklch(18% 0.12 295);
-  --ring: oklch(65% 0.32 295);
+  --border: oklch(35% 0.04 285);
+  --input: oklch(28% 0.06 285);
+  --ring: oklch(72% 0.22 295);
   
-  --chart-1: oklch(58% 0.36 310);
-  --chart-2: oklch(62% 0.34 285);
-  --chart-3: oklch(54% 0.38 300);
-  --chart-4: oklch(64% 0.32 275);
-  --chart-5: oklch(60% 0.36 310);
+  --chart-1: oklch(68% 0.24 300);
+  --chart-2: oklch(72% 0.20 270);
+  --chart-3: oklch(65% 0.26 310);
+  --chart-4: oklch(75% 0.16 255);
+  --chart-5: oklch(70% 0.20 290);
   
-  --sidebar: oklch(13% 0.13 295);
-  --sidebar-foreground: oklch(99.5% 0.03 290);
-  --sidebar-primary: oklch(65% 0.32 295);
-  --sidebar-primary-foreground: oklch(99.5% 0.03 290);
-  --sidebar-accent: oklch(18% 0.12 295);
-  --sidebar-accent-foreground: oklch(99.5% 0.03 290);
-  --sidebar-border: oklch(25% 0.10 295);
-  --sidebar-ring: oklch(65% 0.32 295);
+  --sidebar: oklch(20% 0.07 285);
+  --sidebar-foreground: oklch(98% 0.01 280);
+  --sidebar-primary: oklch(72% 0.22 295);
+  --sidebar-primary-foreground: oklch(98% 0.01 280);
+  --sidebar-accent: oklch(28% 0.06 285);
+  --sidebar-accent-foreground: oklch(98% 0.01 280);
+  --sidebar-border: oklch(35% 0.04 285);
+  --sidebar-ring: oklch(72% 0.22 295);
   
-  /* Stellar purple glows */
-  --glow-primary: 0 0 50px rgba(168, 85, 247, 0.8), 0 0 100px rgba(168, 85, 247, 0.4);
-  --glow-accent: 0 0 50px rgba(109, 40, 217, 0.8), 0 0 100px rgba(109, 40, 217, 0.4);
-  --shadow-elevated: 0 30px 80px -20px rgba(168, 85, 247, 0.4);
-  --shadow-card: 0 8px 40px rgba(168, 85, 247, 0.25);
+  --glow-primary: 0 0 40px rgba(168, 85, 247, 0.6), 0 0 80px rgba(168, 85, 247, 0.3);
+  --glow-accent: 0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3);
+  --shadow-elevated: 0 20px 60px -10px rgba(168, 85, 247, 0.4);
+  --shadow-card: 0 4px 30px rgba(168, 85, 247, 0.2);
+  --shadow-card-hover: 0 15px 50px -5px rgba(168, 85, 247, 0.3);
+  --shadow-glow-primary-hover: 0 20px 60px -5px rgba(168, 85, 247, 0.7);
+  --shadow-glow-accent-hover: 0 20px 60px -5px rgba(139, 92, 246, 0.7);
 }
 
 @theme inline {
   --font-sans: 'Geist', 'Geist Fallback', system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback', 'Courier New', monospace;
   
-  /* Full purple spectrum mapping */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -144,14 +141,12 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
   
-  /* Cosmic radii */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 6px);
   --radius-2xl: calc(var(--radius) + 12px);
   
-  /* Sidebar cosmic purple */
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -161,11 +156,13 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   
-  /* Nebula utilities */
-  --glow-primary: var(--glow-primary);
-  --glow-accent: var(--glow-accent);
-  --shadow-elevated: var(--shadow-elevated);
-  --shadow-card: var(--shadow-card);
+  --shadow-glow-primary: var(--glow-primary);
+  --shadow-glow-accent: var(--glow-accent);
+  --shadow-glow-card: var(--shadow-card);
+  --shadow-glow-card-hover: var(--shadow-card-hover);
+  --shadow-glow-elevated: var(--shadow-elevated);
+  --shadow-glow-primary-hover: var(--shadow-glow-primary-hover);
+  --shadow-glow-accent-hover: var(--shadow-glow-accent-hover);
 }
 
 @layer base {
@@ -173,167 +170,157 @@
     @apply border-border outline-ring/50;
   }
   
+  /* CRITICAL MOBILE FIX: Prevent horizontal overflow on ALL elements */
+  html {
+    overflow-x: hidden;
+    max-width: 100vw;
+    position: relative;
+  }
+  
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: 'cv11', 'ss01';
     font-variation-settings: 'opsz' auto;
-  }
-  
-  /* Nebula-infused glassmorphism */
-  .glass {
-    background: rgba(219, 200, 255, 0.8); /* Purple nebula tint */
-    backdrop-filter: blur(24px) saturate(220%);
-    border: 1px solid rgba(139, 37, 226, 0.25);
-    box-shadow: 0 12px 50px rgba(139, 37, 226, 0.15);
+    overflow-x: hidden;
+    max-width: 100vw;
     position: relative;
-    overflow: hidden;
+    min-height: 100vh;
   }
   
-  .glass::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(139, 37, 226, 0.1) 0%, transparent 70%);
-    animation: nebula-float 20s ease-in-out infinite;
-    pointer-events: none;
+  /* Ensure main content containers don't overflow */
+  #__next,
+  main,
+  [role="main"] {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
+  /* Premium glassmorphism - MOBILE OPTIMIZED */
+  .glass {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(168, 85, 247, 0.20);
+    box-shadow: 0 8px 32px rgba(107, 78, 255, 0.12), 0 0 0 1px rgba(168, 85, 247, 0.05) inset;
+    position: relative;
   }
   
   .dark .glass {
-    background: rgba(20, 5, 50, 0.75); /* Void purple glass */
-    border: 1px solid rgba(168, 85, 247, 0.5);
-    box-shadow: 0 12px 50px rgba(168, 85, 247, 0.25);
+    background: rgba(34, 20, 60, 0.7);
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    box-shadow: 0 8px 32px rgba(168, 85, 247, 0.20), 0 0 0 1px rgba(168, 85, 247, 0.10) inset;
   }
   
-  .dark .glass::before {
-    background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
-  }
-  
-  /* Stellar glass for heroes */
+  /* Stronger glass - MOBILE SAFE */
   .glass-strong {
-    background: rgba(219, 200, 255, 0.95);
-    backdrop-filter: blur(28px) saturate(220%);
-    border: 1px solid rgba(139, 37, 226, 0.35);
-    box-shadow: var(--shadow-elevated);
+    background: rgba(255, 255, 255, 0.90);
+    backdrop-filter: blur(20px) saturate(200%);
+    border: 1px solid rgba(168, 85, 247, 0.25);
+    @apply shadow-glow-card;
     position: relative;
-  }
-  
-  .glass-strong::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: conic-gradient(from 0deg, transparent, rgba(139, 37, 226, 0.05), transparent);
-    animation: rotate 30s linear infinite;
-    pointer-events: none;
+    box-shadow: 0 4px 20px rgba(107, 78, 255, 0.15), 0 0 0 1px rgba(168, 85, 247, 0.08) inset;
   }
   
   .dark .glass-strong {
-    background: rgba(20, 5, 50, 0.95);
-    border: 1px solid rgba(168, 85, 247, 0.6);
-    box-shadow: var(--shadow-elevated);
+    background: rgba(34, 20, 60, 0.85);
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    @apply shadow-glow-card;
+    box-shadow: 0 4px 30px rgba(168, 85, 247, 0.25), 0 0 0 1px rgba(168, 85, 247, 0.15) inset;
   }
   
-  /* Cosmic glows with orbit */
+  /* Glow effects */
   .glow-primary {
-    box-shadow: var(--glow-primary);
-    transition: all 0.4s ease;
-    position: relative;
-  }
-  
-  .glow-primary::after {
-    content: '';
-    position: absolute;
-    inset: -10px;
-    border-radius: inherit;
-    background: conic-gradient(rgba(139, 37, 226, 0.2), transparent 50%);
-    animation: orbit 4s linear infinite;
-    z-index: -1;
+    @apply shadow-glow-primary;
   }
   
   .shadow-glow-primary {
-    box-shadow: 0 15px 55px -10px rgba(139, 37, 226, 0.7);
+    box-shadow: var(--glow-primary);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .shadow-glow-primary:hover {
-    box-shadow: 0 22px 65px -10px rgba(139, 37, 226, 0.8);
     transform: translateY(-3px) scale(1.02);
   }
   
   .shadow-glow-accent {
-    box-shadow: 0 15px 55px -10px rgba(109, 40, 217, 0.7);
+    box-shadow: var(--glow-accent);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .shadow-glow-accent:hover {
-    box-shadow: 0 22px 65px -10px rgba(109, 40, 217, 0.8);
     transform: translateY(-3px) scale(1.02);
   }
   
-  /* Pulsar logo glow */
+  /* Interactive cards - MOBILE TOUCH OPTIMIZED */
+  .card-interactive {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .card-interactive:hover {
+    transform: translateY(-4px) scale(1.01);
+    @apply shadow-glow-card-hover;
+  }
+  
+  .card-interactive:active {
+    transform: translateY(-2px) scale(1.005);
+  }
+  
+  /* Mobile: Reduce hover effects on touch devices */
+  @media (hover: none) and (pointer: coarse) {
+    .card-interactive:hover {
+      transform: none;
+    }
+    
+    .shadow-glow-primary:hover,
+    .shadow-glow-accent:hover {
+      transform: none;
+    }
+  }
+  
+  /* Logo glow */
   .drop-shadow-glow-primary {
-    filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.8));
-    transition: filter 0.5s ease;
+    filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.6));
   }
   
-  .drop-shadow-glow-primary:hover {
-    filter: drop-shadow(0 0 45px rgba(168, 85, 247, 1));
-  }
-  
-  /* Ethereal transitions */
+  /* Smooth transitions */
   .glass,
   .glass-strong,
+  .card-interactive,
   button,
   [role="button"] {
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
-  /* Nebula text enhancement */
+  /* Text shadow for readability */
   .text-balance,
   .text-pretty {
-    text-shadow: 0 1px 10px rgba(139, 37, 226, 0.1);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
   
   .dark .text-balance,
   .dark .text-pretty {
-    text-shadow: 0 1px 20px rgba(168, 85, 247, 0.2);
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
   }
   
-  /* Galactic gradient text */
+  /* Premium gradient text */
   .gradient-text {
     background: linear-gradient(135deg, 
-      oklch(52% 0.36 295) 0%, 
-      oklch(58% 0.30 280) 40%, 
-      oklch(56% 0.34 310) 100%);
+      oklch(58% 0.28 295) 0%, 
+      oklch(65% 0.22 260) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    position: relative;
   }
   
-  .gradient-text::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, transparent 0%, rgba(139, 37, 226, 0.05) 50%, transparent 100%);
-    pointer-events: none;
-    animation: shimmer 3s ease-in-out infinite;
-  }
-  
-  /* Staggered cosmic fade */
+  /* Animations */
   @keyframes fade-in {
     from {
       opacity: 0;
-      transform: translateY(15px) scale(0.95);
+      transform: translateY(10px);
     }
     to {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translateY(0);
     }
   }
   
@@ -342,54 +329,20 @@
     opacity: 0;
   }
   
-  /* [data-delay] for stagger */
-  .animate-fade-in[data-delay="1"] { animation-delay: 0.1s; }
-  .animate-fade-in[data-delay="2"] { animation-delay: 0.2s; }
-  .animate-fade-in[data-delay="3"] { animation-delay: 0.3s; }
-  .animate-fade-in[data-delay="4"] { animation-delay: 0.4s; }
-  
-  /* Pulsar pulse */
   @keyframes pulse-glow {
     0%, 100% {
-      filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.6));
-      transform: scale(1);
+      filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.6));
     }
     50% {
-      filter: drop-shadow(0 0 45px rgba(168, 85, 247, 0.9));
-      transform: scale(1.05);
+      filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.9));
     }
   }
   
   .animate-pulse {
-    animation: pulse-glow 2s ease-in-out infinite;
+    animation: pulse-glow 3s ease-in-out infinite;
   }
   
-  /* Nebula float keyframe */
-  @keyframes nebula-float {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    33% { transform: translate(10px, -10px) rotate(120deg); }
-    66% { transform: translate(-10px, 10px) rotate(240deg); }
-  }
-  
-  /* Orbit ring */
-  @keyframes orbit {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-  
-  /* Rotate conic */
-  @keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-  
-  /* Shimmer for text */
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-  
-  /* Cosmic layout utilities */
+  /* Nebula background - MOBILE SAFE */
   .nebula-bg {
     background: radial-gradient(ellipse at center, 
       rgba(139, 37, 226, 0.2) 0%, 
@@ -398,65 +351,13 @@
     position: relative;
   }
   
-  .nebula-bg::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23A855F7' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    animation: twinkle 5s linear infinite;
-  }
-  
-  @keyframes twinkle {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.8; }
-  }
-  
-  /* Floating orb graphic */
-  .floating-orb {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
-    border-radius: 50%;
-    animation: float 6s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 0;
-  }
-  
-  .floating-orb:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
-  .floating-orb:nth-child(2) { top: 60%; right: 10%; animation-delay: 2s; }
-  .floating-orb:nth-child(3) { bottom: 20%; left: 20%; animation-delay: 4s; }
-  
-  @keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-20px) rotate(180deg); }
-  }
-  
-  /* Pro sidebar nav with purple waves */
+  /* Sidebar nav with smooth transitions */
   .sidebar-nav-item {
     position: relative;
     transition: all 0.3s ease;
     padding: 1rem 1.25rem;
     border-radius: var(--radius-md);
     overflow: hidden;
-  }
-  
-  .sidebar-nav-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(139, 37, 226, 0.1), transparent);
-    transition: left 0.6s;
-  }
-  
-  .sidebar-nav-item:hover::before {
-    left: 100%;
   }
   
   .sidebar-nav-item:hover {
@@ -469,29 +370,42 @@
     background: rgba(168, 85, 247, 0.25);
   }
   
-  /* Hero layout enhancer */
-  .hero-section {
-    position: relative;
-    overflow: hidden;
+  /* Mobile-specific optimizations */
+  @media (max-width: 768px) {
+    /* Reduce animation complexity on mobile for performance */
+    .glass,
+    .glass-strong {
+      backdrop-filter: blur(12px) saturate(150%);
+    }
+    
+    /* Simplify shadows on mobile */
+    .shadow-glow-primary,
+    .shadow-glow-accent {
+      box-shadow: 0 8px 24px rgba(107, 78, 255, 0.3);
+    }
+    
+    /* Ensure buttons are tap-friendly */
+    button,
+    [role="button"],
+    a {
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Prevent zoom on input focus (iOS) */
+    input,
+    textarea,
+    select {
+      font-size: 16px;
+    }
   }
   
-  .hero-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, 
-      transparent 0%, 
-      rgba(139, 37, 226, 0.05) 50%, 
-      transparent 100%);
-    animation: wave 10s ease-in-out infinite;
-    z-index: -1;
-  }
-  
-  @keyframes wave {
-    0%, 100% { transform: translateX(-100%); }
-    50% { transform: translateX(100%); }
+  /* Extra small devices */
+  @media (max-width: 480px) {
+    /* Further reduce complexity */
+    .glass,
+    .glass-strong {
+      backdrop-filter: blur(8px) saturate(120%);
+    }
   }
 }
