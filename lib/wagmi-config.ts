@@ -1,6 +1,6 @@
 import { createConfig, http } from "wagmi"
 import { base, baseSepolia } from "wagmi/chains"
-import { coinbaseWallet, injected, walletConnect } from "wagmi/connectors"
+import { coinbaseWallet, injected } from "wagmi/connectors"
 
 const isDevelopment = process.env.NODE_ENV === "development"
 const chains = [isDevelopment ? baseSepolia : base] as const
@@ -13,13 +13,6 @@ export const config = createConfig({
       preference: "smartWalletOnly",
     }),
     injected(),
-    ...(process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
-      ? [
-          walletConnect({
-            projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
-          }),
-        ]
-      : []),
   ],
   transports: {
     [base.id]: http(process.env.NEXT_PUBLIC_RPC_URL || "https://mainnet.base.org"),
