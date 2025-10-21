@@ -1,200 +1,227 @@
-import type React from "react"
+"use client"
+
+import { useAccount } from "wagmi"
+import { useRouter } from "next/navigation"
 import { AuroraBackground } from "@/components/aurora-background"
-import { GenesisOrb } from "@/components/genesis-orb"
 import { Navigation } from "@/components/navigation"
-import { ArrowRight, Sparkles, Lock, Users, Check } from "lucide-react"
-import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Sparkles, Lock, Users, Zap, ArrowRight } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
-function getCurrentYear() {
-  return new Date().getFullYear();
-}
-
-export default function HomePage() {
-  const currentYear = getCurrentYear();
+export default function LandingPage() {
+  const { isConnected } = useAccount()
+  const router = useRouter()
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen overflow-x-hidden">
       <AuroraBackground />
       <Navigation />
 
-      {/* Hero Section */}
-      <section className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 pt-16 md:pt-20">
-        <div className="mx-auto max-w-5xl text-center">
-          {/* Logo */}
-          <div className="mb-8 flex justify-center">
-            <Image
-              src="revel-logo.png"
-              alt="Revel"
-              width={120}
-              height={120}
-              className="animate-pulse drop-shadow-glow-primary"
-            />
-          </div>
+      <div className="relative z-10">
+        {/* Hero Section */}
+        <section className="px-4 py-24 md:py-32 text-center">
+          <div className="mx-auto max-w-6xl space-y-10">
+            {/* Logo with Shine Effect */}
+            <div className="flex justify-center mb-8 animate-fade-in">
+              <div className="relative group">
+                {/* Glowing background */}
+                <div className="absolute inset-0 -m-6 bg-gradient-to-r from-primary via-accent to-primary rounded-full blur-3xl opacity-40 group-hover:opacity-60 animate-pulse transition-opacity" />
+                
+                {/* Logo */}
+                <div className="relative">
+                  <Image
+                    src="/revel-logo.png"
+                    alt="Revel"
+                    width={140}
+                    height={140}
+                    className="relative z-10 drop-shadow-2xl"
+                  />
+                  {/* Shimmer overlay */}
+                  <div className="absolute inset-0 overflow-hidden rounded-full pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent animate-shimmer" style={{ width: '200%', height: '200%' }} />
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          {/* Headline */}
-          <h1 className="mb-6 text-balance text-5xl font-bold leading-tight tracking-tight md:text-7xl">
-            Onchain Experiences
-            <br />
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              For Your Community
-            </span>
-          </h1>
-          <center>
-            <p className="mb-12 max-w-3xl text-pretty text-lg text-foreground md:text-xl">
-              Create token-gated content, exclusive drops, and unforgettable moments
-              <br className="hidden md:block" />
-              for your most dedicated fans. Built on Base.
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass border border-primary/30 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+              <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+              <span className="text-sm font-semibold text-primary">Powered by Zora & Base</span>
+            </div>
+
+            <h1 className="text-6xl md:text-8xl font-bold leading-[1.1] animate-fade-in tracking-tight" style={{ animationDelay: '0.2s' }}>
+              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                Turn Your Zora Coins
+              </span>
+              <br />
+              <span className="text-foreground">Into Access Keys</span>
+            </h1>
+
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              Revel Access lets creators share exclusive content with their community using Zora Creator Coins as token gates. 
+              <span className="block mt-2 font-semibold text-foreground">No new tokens. No code. Simple on-chain access.</span>
             </p>
-          </center>
 
-          {/* CTA Buttons */}
-          <div className="mb-16 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <GenesisOrb />
-            <Link
-              href="/explore"
-              className="glass group flex items-center gap-3 rounded-full px-8 py-4 font-semibold text-foreground transition-all hover:bg-primary/5 hover:border-primary hover:shadow-glow-primary"
-            >
-              Explore Drops
-              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
-
-          {/* Trust Badge */}
-          <div className="mb-12 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
-            <Sparkles className="h-4 w-4" />
-            Powered by Zora Creator Coins on Base
-          </div>
-
-          {/* Feature Cards */}
-          <div className="grid gap-6 md:grid-cols-3">
-            <FeatureCard
-              icon={<Sparkles className="h-6 w-6 text-primary" />}
-              title="Exclusive Drops"
-              description="Share premium content with token holders"
-            />
-            <FeatureCard
-              icon={<Lock className="h-6 w-6 text-accent" />}
-              title="Token-Gated"
-              description="Powered by Zora Creator Coins on Base"
-            />
-            <FeatureCard
-              icon={<Users className="h-6 w-6 text-primary" />}
-              title="Build Community"
-              description="Reward your most engaged supporters"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="relative z-10 px-4 py-24">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="mb-16 text-center text-4xl font-bold md:text-5xl text-foreground">
-            How It Works
-          </h2>
-
-          <div className="grid gap-12 md:grid-cols-2">
-            {/* For Creators */}
-            <div className="glass-strong rounded-3xl p-8 shadow-lg backdrop-blur-xl transition-all hover:shadow-glow-primary">
-              <div className="mb-6 inline-flex rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-                For Creators
-              </div>
-              <h3 className="mb-4 text-2xl font-bold text-foreground">Share Your Best Work</h3>
-              <ol className="space-y-4">
-                <li className="flex gap-3 text-foreground">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary animate-fade-in">
-                    <Check className="h-4 w-4" />
-                  </span>
-                  <span>Connect your wallet and set up your creator profile</span>
-                </li>
-                <li className="flex gap-3 text-foreground">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary animate-fade-in [animation-delay:0.1s]">
-                    <Check className="h-4 w-4" />
-                  </span>
-                  <span>Create a drop with exclusive content (video, audio, images)</span>
-                </li>
-                <li className="flex gap-3 text-foreground">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary animate-fade-in [animation-delay:0.2s]">
-                    <Check className="h-4 w-4" />
-                  </span>
-                  <span>Set token requirements using your Zora Creator Coin</span>
-                </li>
-                <li className="flex gap-3 text-foreground">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary animate-fade-in [animation-delay:0.3s]">
-                    <Check className="h-4 w-4" />
-                  </span>
-                  <span>Share with your community and watch engagement grow</span>
-                </li>
-              </ol>
-            </div>
-
-            {/* For Fans */}
-            <div className="glass-strong rounded-3xl p-8 shadow-lg backdrop-blur-xl transition-all hover:shadow-glow-accent">
-              <div className="mb-6 inline-flex rounded-full bg-accent/10 px-4 py-2 text-sm font-semibold text-accent">
-                For Fans
-              </div>
-              <h3 className="mb-4 text-2xl font-bold text-foreground">Unlock Exclusive Access</h3>
-              <ol className="space-y-4">
-                <li className="flex gap-3 text-foreground">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/20 text-sm font-bold text-accent animate-fade-in">
-                    <Check className="h-4 w-4" />
-                  </span>
-                  <span>Connect your wallet to discover creators</span>
-                </li>
-                <li className="flex gap-3 text-foreground">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/20 text-sm font-bold text-accent animate-fade-in [animation-delay:0.1s]">
-                    <Check className="h-4 w-4" />
-                  </span>
-                  <span>Browse exclusive drops from your favorite creators</span>
-                </li>
-                <li className="flex gap-3 text-foreground">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/20 text-sm font-bold text-accent animate-fade-in [animation-delay:0.2s]">
-                    <Check className="h-4 w-4" />
-                  </span>
-                  <span>Hold the required Creator Coins to unlock content</span>
-                </li>
-                <li className="flex gap-3 text-foreground">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/20 text-sm font-bold text-accent animate-fade-in [animation-delay:0.3s]">
-                    <Check className="h-4 w-4" />
-                  </span>
-                  <span>Enjoy premium experiences and support creators directly</span>
-                </li>
-              </ol>
+            <div className="flex flex-col sm:flex-row gap-5 justify-center items-center animate-fade-in pt-4" style={{ animationDelay: '0.4s' }}>
+              {isConnected ? (
+                <Link href="/auth">
+                  <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-12 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
+                    Sign In with Zora
+                    <ArrowRight className="ml-2 h-6 w-6" />
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/auth">
+                  <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-12 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
+                    Get Started
+                    <Sparkles className="ml-2 h-6 w-6" />
+                  </Button>
+                </Link>
+              )}
+              <Link href="/explore">
+                <Button variant="outline" className="rounded-full glass border-primary/30 px-12 py-8 text-xl font-semibold hover:bg-primary/5 hover:border-primary/50 transition-all">
+                  Explore Drops
+                </Button>
+              </Link>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-border/50 px-4 py-12 backdrop-blur-sm">
-        <div className="mx-auto max-w-6xl text-center">
-          <p className="font-sans font-bold text-base text-muted-foreground">
-            Built on Base • Powered by Zora Creator Coins
-          </p>
-          <p className="mt-2 font-sans font-bold text-base text-muted-foreground">
-            © {currentYear} Revel. All rights reserved.
-          </p>
-        </div>
-      </footer>
-    </div>
-  )
-}
+        {/* Features */}
+        <section className="px-4 py-28">
+          <div className="mx-auto max-w-7xl">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">Why Creators Choose Revel</h2>
+              <p className="text-xl text-muted-foreground">Built for the next generation of creator economy</p>
+            </div>
 
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode
-  title: string
-  description: string
-}) {
-  return (
-    <div className="glass rounded-2xl p-6 text-center transition-all hover:border-primary/50 hover:shadow-glow-primary animate-fade-in">
-      <div className="mb-4 flex justify-center">{icon}</div>
-      <h3 className="mb-2 text-lg font-semibold text-foreground">{title}</h3>
-      <p className="text-sm text-foreground/80">{description}</p>
+            <div className="grid md:grid-cols-3 gap-8">
+              <Card className="glass-strong border-primary/20 hover:border-primary/50 transition-all group hover:scale-105 hover:shadow-glow-primary">
+                <CardContent className="pt-10 pb-8 px-8 space-y-5">
+                  <div className="inline-flex rounded-full bg-primary/10 p-5 group-hover:bg-primary/20 transition-colors">
+                    <Lock className="h-10 w-10 text-primary" />
+                  </div>
+                  <h3 className="text-2xl font-bold">Token-Gated Drops</h3>
+                  <p className="text-muted-foreground text-base leading-relaxed">
+                    Share exclusive content that only your coin holders can access. Set custom token requirements in real-time.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-strong border-accent/20 hover:border-accent/50 transition-all group hover:scale-105 hover:shadow-glow-accent">
+                <CardContent className="pt-10 pb-8 px-8 space-y-5">
+                  <div className="inline-flex rounded-full bg-accent/10 p-5 group-hover:bg-accent/20 transition-colors">
+                    <Zap className="h-10 w-10 text-accent" />
+                  </div>
+                  <h3 className="text-2xl font-bold">Instant Verification</h3>
+                  <p className="text-muted-foreground text-base leading-relaxed">
+                    Sign in with your Zora profile. We verify ownership on-chain to prevent impersonation.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-strong border-primary/20 hover:border-primary/50 transition-all group hover:scale-105 hover:shadow-glow-primary">
+                <CardContent className="pt-10 pb-8 px-8 space-y-5">
+                  <div className="inline-flex rounded-full bg-primary/10 p-5 group-hover:bg-primary/20 transition-colors">
+                    <Users className="h-10 w-10 text-primary" />
+                  </div>
+                  <h3 className="text-2xl font-bold">Own Your Community</h3>
+                  <p className="text-muted-foreground text-base leading-relaxed">
+                    No platform fees. No middlemen. Your coins, your rules, your community on Base.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works */}
+        <section className="px-4 py-28">
+          <div className="mx-auto max-w-6xl space-y-16">
+            <div className="text-center space-y-5">
+              <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                How It Works
+              </h2>
+              <p className="text-xl md:text-2xl text-muted-foreground">
+                Three simple steps to start sharing exclusive content
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-12">
+              <div className="text-center space-y-5 group">
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/20 text-primary font-bold text-3xl border-2 border-primary group-hover:scale-110 transition-transform shadow-lg">
+                  1
+                </div>
+                <h3 className="text-2xl font-bold">Sign In with Zora</h3>
+                <p className="text-muted-foreground text-base leading-relaxed">
+                  Connect your Base wallet and verify your Zora profile. We check that you own the profile.
+                </p>
+              </div>
+
+              <div className="text-center space-y-5 group">
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-accent/20 text-accent font-bold text-3xl border-2 border-accent group-hover:scale-110 transition-transform shadow-lg">
+                  2
+                </div>
+                <h3 className="text-2xl font-bold">Create Your Drop</h3>
+                <p className="text-muted-foreground text-base leading-relaxed">
+                  Upload content and set how many of your coins fans need to hold. We fetch real-time prices.
+                </p>
+              </div>
+
+              <div className="text-center space-y-5 group">
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/20 text-primary font-bold text-3xl border-2 border-primary group-hover:scale-110 transition-transform shadow-lg">
+                  3
+                </div>
+                <h3 className="text-2xl font-bold">Share & Earn</h3>
+                <p className="text-muted-foreground text-base leading-relaxed">
+                  Share your drop link. Only holders can access. Track views and grow your community.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="px-4 py-28">
+          <div className="mx-auto max-w-5xl">
+            <Card className="glass-strong border-primary/30 overflow-hidden hover:border-primary/50 transition-all">
+              <div className="relative p-16 md:p-20 text-center space-y-8">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10" />
+                <div className="relative z-10">
+                  <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+                    Ready to Take Control of Your Community?
+                  </h2>
+                  <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed">
+                    Join creators who are building ownership-based communities on Base.
+                  </p>
+                  <Link href="/auth">
+                    <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-14 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
+                      Get Started Free
+                      <ArrowRight className="ml-2 h-7 w-7" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </section>
+      </div>
+
+      <style jsx>{`
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-150%) translateY(-150%) rotate(45deg);
+          }
+          100% {
+            transform: translateX(150%) translateY(150%) rotate(45deg);
+          }
+        }
+        .animate-shimmer {
+          animation: shimmer 3s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   )
 }

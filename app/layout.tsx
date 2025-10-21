@@ -3,6 +3,9 @@ import "./globals.css"
 import type { Metadata } from "next"
 import { Providers } from "@/components/providers"
 
+import { GeistSans } from "geist/font/sans"
+import { GeistMono } from "geist/font/mono"
+
 export const metadata: Metadata = {
   title: "Revel - Onchain Experiences for Creators",
   description: "Token-gated content platform for Web3 creators and their communities",
@@ -17,11 +20,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <head>
-        <link href="https://api.fontshare.com/v2/css?f[]=mona-sans@400,500,600,700&display=swap" rel="stylesheet" />
-      </head>
-      <body>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <head />
+      <body className="font-sans">
         <Providers>{children}</Providers>
       </body>
     </html>

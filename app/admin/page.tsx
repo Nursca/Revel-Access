@@ -1,98 +1,232 @@
 "use client"
 
-import type React from "react"
-
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
 import { useAccount } from "wagmi"
+import { useRouter } from "next/navigation"
+import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { AuroraBackground } from "@/components/aurora-background"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Users, Lock, TrendingUp, Eye, Shield, AlertCircle, CheckCircle, XCircle, MoreVertical } from "lucide-react"
-import type { Drop } from "@/lib/types"
-import type { UserProfile } from "@/lib/auth"
-import Link from "next/link"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import {
+  Loader2,
+  Users,
+  FileText,
+  TrendingUp,
+  Eye,
+  Trash2,
+  Search,
+  Shield,
+  AlertCircle,
+} from "lucide-react"
+import { toast } from "sonner"
 
-// Admin wallet addresses (in production, this would be in env vars or database)
-const ADMIN_ADDRESSES = ["0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"]
+// Get admin wallets from environment variable
+const getAdminWallets = (): string[] => {
+  const wallets = process.env.NEXT_PUBLIC_ADMIN_WALLETS || ""
+  return wallets.split(",").map((w) => w.trim().toLowerCase()).filter(Boolean)
+}
 
-export default function AdminPage() {
-  const router = useRouter()
+const ADMIN_WALLETS = getAdminWallets()
+
+interface User {
+  wallet_address: string
+  display_name: string
+  zora_handle: string
+  profile_image?: string
+  is_creator: boolean
+  created_at: string
+}
+
+interface Drop {
+  id: string
+  title: string
+  description?: string
+  is_active: boolean
+  view_count: number
+  unlock_count: number
+  creator: {
+    display_name: string
+  }[]
+}
+
+export default function AdminDashboard() {
   const { address, isConnected } = useAccount()
+  const router = useRouter()
   const [isAdmin, setIsAdmin] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalCreators: 0,
     totalFans: 0,
     totalDrops: 0,
-    activeDrops: 0,
     totalViews: 0,
     totalUnlocks: 0,
   })
+  const [users, setUsers] = useState<User[]>([])
   const [drops, setDrops] = useState<Drop[]>([])
-  const [users, setUsers] = useState<UserProfile[]>([])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [activeTab, setActiveTab] = useState<"overview" | "users" | "drops">("overview")
+  const supabase = getSupabaseBrowserClient()
 
   useEffect(() => {
-    // Check if user is admin
     if (!isConnected || !address) {
-      router.push("/")
+      router.push("/auth")
       return
     }
 
-    const isAdminUser = ADMIN_ADDRESSES.includes(address)
-    if (!isAdminUser) {
-      router.push("/")
+    if (ADMIN_WALLETS.length === 0) {
+      toast.error("No admin wallets configured. Set NEXT_PUBLIC_ADMIN_WALLETS in .env.local")
+      router.push("/explore")
+      return
+    }
+
+    if (!ADMIN_WALLETS.includes(address.toLowerCase())) {
+      toast.error("Access denied. Admin only.")
+      router.push("/explore")
       return
     }
 
     setIsAdmin(true)
+    loadDashboardData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected, address, router])
 
-    // Load data
-    loadAdminData()
-  }, [address, isConnected, router])
+  const loadDashboardData = async () => {
+    if (!supabase) return
 
-  const loadAdminData = () => {
-    // TODO: Fetch from database when Supabase is connected
-    // For now, load from localStorage
+    setIsLoading(true)
 
-    // Load drops
-    const savedDrops = localStorage.getItem("revel_drops")
-    if (savedDrops) {
-      const allDrops: Drop[] = JSON.parse(savedDrops)
-      setDrops(allDrops)
+    try {
+      const { data: usersData, error: usersError } = await supabase
+        .from("users")
+        .select("*")
+        .order("created_at", { ascending: false })
 
-      // Calculate stats
-      const activeDrops = allDrops.filter((d) => d.status === "active")
-      const totalViews = allDrops.reduce((sum, drop) => sum + (drop.views || 0), 0)
-      const totalUnlocks = allDrops.reduce((sum, drop) => sum + (drop.unlocks || 0), 0)
+      if (usersError) throw usersError
 
-      setStats((prev) => ({
-        ...prev,
-        totalDrops: allDrops.length,
-        activeDrops: activeDrops.length,
+      const { data: dropsData, error: dropsError } = await supabase
+        .from("drops")
+        .select(
+          `
+          *,
+          creator:users!creator_wallet_address (
+            display_name,
+            zora_handle
+          )
+        `
+        )
+        .order("created_at", { ascending: false })
+
+      if (dropsError) throw dropsError
+
+      setUsers(usersData || [])
+      setDrops(dropsData || [])
+
+      const creators = (usersData || []).filter((u: User) => u.is_creator)
+      const fans = (usersData || []).filter((u: User) => !u.is_creator)
+      const totalViews = (dropsData || []).reduce((sum: number, d: Drop) => sum + (d.view_count || 0), 0)
+      const totalUnlocks = (dropsData || []).reduce((sum: number, d: Drop) => sum + (d.unlock_count || 0), 0)
+
+      setStats({
+        totalUsers: usersData?.length || 0,
+        totalCreators: creators.length,
+        totalFans: fans.length,
+        totalDrops: dropsData?.length || 0,
         totalViews,
         totalUnlocks,
-      }))
+      })
+    } catch (error) {
+      console.error("Error loading admin data:", error)
+      toast.error("Failed to load dashboard data")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDeleteUser = async (walletAddress: string) => {
+    if (!confirm("Are you sure you want to delete this user? This will also delete all their drops.")) {
+      return
     }
 
-    // Load users (mock data for now)
-    const mockUsers: UserProfile[] = [
-      {
-        walletAddress: "0x123...",
-        role: "creator",
-        displayName: "Sample Creator",
-        bio: "Creating amazing content",
-        createdAt: new Date().toISOString(),
-      },
-    ]
-    setUsers(mockUsers)
-    setStats((prev) => ({
-      ...prev,
-      totalUsers: mockUsers.length,
-      totalCreators: mockUsers.filter((u) => u.role === "creator").length,
-      totalFans: mockUsers.filter((u) => u.role === "fan").length,
-    }))
+    try {
+      const { error } = await supabase!
+        .from("users")
+        .delete()
+        .eq("wallet_address", walletAddress)
+
+      if (error) throw error
+
+      toast.success("User deleted successfully")
+      loadDashboardData()
+    } catch (error) {
+      console.error("Error deleting user:", error)
+      toast.error("Failed to delete user")
+    }
+  }
+
+  const handleDeleteDrop = async (dropId: string) => {
+    if (!confirm("Are you sure you want to delete this drop?")) {
+      return
+    }
+
+    try {
+      const { error } = await supabase!
+        .from("drops")
+        .delete()
+        .eq("id", dropId)
+
+      if (error) throw error
+
+      toast.success("Drop deleted successfully")
+      loadDashboardData()
+    } catch (error) {
+      console.error("Error deleting drop:", error)
+      toast.error("Failed to delete drop")
+    }
+  }
+
+  const handleToggleDropStatus = async (dropId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase!
+        .from("drops")
+        .update({ is_active: !currentStatus })
+        .eq("id", dropId)
+
+      if (error) throw error
+
+      toast.success(`Drop ${!currentStatus ? "activated" : "deactivated"}`)
+      loadDashboardData()
+    } catch (error) {
+      console.error("Error toggling drop status:", error)
+      toast.error("Failed to update drop status")
+    }
+  }
+
+  const filteredUsers = users.filter(
+    (user) =>
+      user.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.zora_handle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.wallet_address.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const filteredDrops = drops.filter(
+    (drop) =>
+      drop.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      drop.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  if (isLoading) {
+    return (
+      <div className="relative min-h-screen overflow-x-hidden">
+        <AuroraBackground />
+        <Navigation />
+        <div className="relative z-10 flex min-h-screen items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      </div>
+    )
   }
 
   if (!isAdmin) {
@@ -100,184 +234,189 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen overflow-x-hidden">
       <AuroraBackground />
       <Navigation />
 
-      <div className="relative z-10 px-4 py-24">
-        <div className="mx-auto max-w-7xl">
-          {/* Header */}
-          <div className="mb-8 flex items-center gap-3">
-            <Shield className="h-8 w-8 text-primary" />
+      <div className="relative z-10 px-4 py-24 max-w-full">
+        <div className="mx-auto max-w-7xl w-full space-y-8">
+          <div className="flex items-center gap-4">
+            <div className="inline-flex rounded-full bg-destructive/10 p-3">
+              <Shield className="h-6 w-6 text-destructive" />
+            </div>
             <div>
-              <h1 className="text-4xl font-bold">Admin Panel</h1>
-              <p className="text-muted-foreground">Platform management and analytics</p>
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Admin Dashboard
+              </h1>
+              <p className="text-muted-foreground">Platform management & analytics</p>
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard icon={<Users className="h-6 w-6 text-primary" />} label="Total Users" value={stats.totalUsers} />
-            <StatCard
-              icon={<Lock className="h-6 w-6 text-accent" />}
-              label="Total Drops"
-              value={stats.totalDrops}
-              subtitle={`${stats.activeDrops} active`}
-            />
-            <StatCard icon={<Eye className="h-6 w-6 text-primary" />} label="Total Views" value={stats.totalViews} />
-            <StatCard
-              icon={<TrendingUp className="h-6 w-6 text-accent" />}
-              label="Total Unlocks"
-              value={stats.totalUnlocks}
-            />
+          <Card className="glass-strong border-destructive/30 bg-destructive/5">
+            <CardContent className="py-4 flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+              <p className="text-sm text-destructive font-medium">
+                Admin access detected. Handle user data responsibly.
+              </p>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <Card className="glass-strong border-primary/20">
+              <CardContent className="pt-6">
+                <Users className="h-4 w-4 text-primary mb-2" />
+                <p className="text-2xl font-bold">{stats.totalUsers}</p>
+                <p className="text-xs text-muted-foreground">Total Users</p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-strong border-accent/20">
+              <CardContent className="pt-6">
+                <Users className="h-4 w-4 text-accent mb-2" />
+                <p className="text-2xl font-bold">{stats.totalCreators}</p>
+                <p className="text-xs text-muted-foreground">Creators</p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-strong border-primary/20">
+              <CardContent className="pt-6">
+                <Users className="h-4 w-4 text-primary mb-2" />
+                <p className="text-2xl font-bold">{stats.totalFans}</p>
+                <p className="text-xs text-muted-foreground">Fans</p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-strong border-accent/20">
+              <CardContent className="pt-6">
+                <FileText className="h-4 w-4 text-accent mb-2" />
+                <p className="text-2xl font-bold">{stats.totalDrops}</p>
+                <p className="text-xs text-muted-foreground">Total Drops</p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-strong border-primary/20">
+              <CardContent className="pt-6">
+                <Eye className="h-4 w-4 text-primary mb-2" />
+                <p className="text-2xl font-bold">{stats.totalViews}</p>
+                <p className="text-xs text-muted-foreground">Total Views</p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-strong border-accent/20">
+              <CardContent className="pt-6">
+                <TrendingUp className="h-4 w-4 text-accent mb-2" />
+                <p className="text-2xl font-bold">{stats.totalUnlocks}</p>
+                <p className="text-xs text-muted-foreground">Unlocks</p>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Tabs */}
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="glass-strong">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="users">Users</TabsTrigger>
-              <TabsTrigger value="drops">Drops</TabsTrigger>
-              <TabsTrigger value="moderation">Moderation</TabsTrigger>
-            </TabsList>
+          <div className="flex gap-2 border-b border-border">
+            <Button
+              variant="ghost"
+              onClick={() => setActiveTab("overview")}
+              className={`rounded-none border-b-2 ${
+                activeTab === "overview" ? "border-primary text-primary" : "border-transparent"
+              }`}
+            >
+              Overview
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setActiveTab("users")}
+              className={`rounded-none border-b-2 ${
+                activeTab === "users" ? "border-primary text-primary" : "border-transparent"
+              }`}
+            >
+              Users ({stats.totalUsers})
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setActiveTab("drops")}
+              className={`rounded-none border-b-2 ${
+                activeTab === "drops" ? "border-primary text-primary" : "border-transparent"
+              }`}
+            >
+              Drops ({stats.totalDrops})
+            </Button>
+          </div>
 
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-6">
-              <div className="glass-strong rounded-3xl p-6">
-                <h2 className="mb-6 text-2xl font-bold">Platform Health</h2>
+          {(activeTab === "users" || activeTab === "drops") && (
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={`Search ${activeTab}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="glass border-primary/30 pl-10"
+              />
+            </div>
+          )}
 
-                <div className="space-y-4">
-                  <HealthItem
-                    icon={<CheckCircle className="h-5 w-5 text-green-500" />}
-                    label="System Status"
-                    value="Operational"
-                    status="success"
-                  />
-                  <HealthItem
-                    icon={<CheckCircle className="h-5 w-5 text-green-500" />}
-                    label="Database"
-                    value="Connected"
-                    status="success"
-                  />
-                  <HealthItem
-                    icon={<CheckCircle className="h-5 w-5 text-green-500" />}
-                    label="Token Verification"
-                    value="Active"
-                    status="success"
-                  />
-                  <HealthItem
-                    icon={<AlertCircle className="h-5 w-5 text-yellow-500" />}
-                    label="Pending Moderation"
-                    value={`${drops.filter((d) => d.status === "draft").length} items`}
-                    status="warning"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-6 lg:grid-cols-2">
-                <div className="glass-strong rounded-3xl p-6">
-                  <h3 className="mb-4 text-xl font-bold">User Breakdown</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Creators</span>
-                      <span className="font-semibold">{stats.totalCreators}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Fans</span>
-                      <span className="font-semibold">{stats.totalFans}</span>
-                    </div>
-                    <div className="flex items-center justify-between border-t border-border pt-3">
-                      <span className="font-semibold">Total</span>
-                      <span className="font-semibold">{stats.totalUsers}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="glass-strong rounded-3xl p-6">
-                  <h3 className="mb-4 text-xl font-bold">Drop Status</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Active</span>
-                      <span className="font-semibold">{stats.activeDrops}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Draft</span>
-                      <span className="font-semibold">{drops.filter((d) => d.status === "draft").length}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Archived</span>
-                      <span className="font-semibold">{drops.filter((d) => d.status === "archived").length}</span>
-                    </div>
-                    <div className="flex items-center justify-between border-t border-border pt-3">
-                      <span className="font-semibold">Total</span>
-                      <span className="font-semibold">{stats.totalDrops}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Users Tab */}
-            <TabsContent value="users">
-              <div className="glass-strong rounded-3xl p-6">
-                <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-2xl font-bold">User Management</h2>
-                  <Button variant="outline" className="glass bg-transparent">
-                    Export Users
-                  </Button>
-                </div>
-
+          {activeTab === "users" && (
+            <Card className="glass-strong border-primary/20">
+              <CardHeader>
+                <CardTitle>All Users</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-border text-left text-sm text-muted-foreground">
-                        <th className="pb-3 font-medium">User</th>
-                        <th className="pb-3 font-medium">Role</th>
-                        <th className="pb-3 font-medium">Wallet</th>
-                        <th className="pb-3 font-medium">Joined</th>
-                        <th className="pb-3 font-medium">Actions</th>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-3 px-4">User</th>
+                        <th className="text-left py-3 px-4">Wallet</th>
+                        <th className="text-left py-3 px-4">Role</th>
+                        <th className="text-left py-3 px-4">Joined</th>
+                        <th className="text-right py-3 px-4">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {users.map((user) => (
-                        <tr key={user.walletAddress} className="border-b border-border/50">
-                          <td className="py-4">
+                      {filteredUsers.map((user) => (
+                        <tr key={user.wallet_address} className="border-b border-border/50">
+                          <td className="py-3 px-4">
                             <div className="flex items-center gap-3">
-                              {user.profileImage ? (
+                              {user.profile_image ? (
                                 <img
-                                  src={user.profileImage || "/placeholder.svg"}
-                                  alt={user.displayName}
-                                  className="h-10 w-10 rounded-full"
+                                  src={user.profile_image}
+                                  alt={user.display_name}
+                                  className="w-8 h-8 rounded-full"
                                 />
                               ) : (
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-bold text-primary">
-                                  {user.displayName[0]}
+                                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                                  <Users className="h-4 w-4 text-primary" />
                                 </div>
                               )}
                               <div>
-                                <div className="font-semibold">{user.displayName}</div>
-                                <div className="text-sm text-muted-foreground">{user.bio?.slice(0, 30)}...</div>
+                                <p className="font-semibold">{user.display_name}</p>
+                                <p className="text-xs text-muted-foreground">@{user.zora_handle}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="py-4">
+                          <td className="py-3 px-4">
+                            <p className="text-xs font-mono text-muted-foreground">
+                              {user.wallet_address.slice(0, 6)}...{user.wallet_address.slice(-4)}
+                            </p>
+                          </td>
+                          <td className="py-3 px-4">
                             <span
-                              className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                                user.role === "creator" ? "bg-primary/10 text-primary" : "bg-accent/10 text-accent"
+                              className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${
+                                user.is_creator ? "bg-primary/10 text-primary" : "bg-accent/10 text-accent"
                               }`}
                             >
-                              {user.role}
+                              {user.is_creator ? "Creator" : "Fan"}
                             </span>
                           </td>
-                          <td className="py-4 font-mono text-sm text-muted-foreground">
-                            {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
+                          <td className="py-3 px-4 text-sm text-muted-foreground">
+                            {new Date(user.created_at).toLocaleDateString()}
                           </td>
-                          <td className="py-4 text-sm text-muted-foreground">
-                            {new Date(user.createdAt).toLocaleDateString()}
-                          </td>
-                          <td className="py-4">
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
+                          <td className="py-3 px-4 text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteUser(user.wallet_address)}
+                              className="text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </td>
                         </tr>
@@ -285,179 +424,82 @@ export default function AdminPage() {
                     </tbody>
                   </table>
                 </div>
-              </div>
-            </TabsContent>
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Drops Tab */}
-            <TabsContent value="drops">
-              <div className="glass-strong rounded-3xl p-6">
-                <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-2xl font-bold">Drop Management</h2>
-                  <Button variant="outline" className="glass bg-transparent">
-                    Export Drops
-                  </Button>
+          {activeTab === "drops" && (
+            <Card className="glass-strong border-primary/20">
+              <CardHeader>
+                <CardTitle>All Drops</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-3 px-4">Drop</th>
+                        <th className="text-left py-3 px-4">Creator</th>
+                        <th className="text-left py-3 px-4">Status</th>
+                        <th className="text-left py-3 px-4">Views</th>
+                        <th className="text-left py-3 px-4">Unlocks</th>
+                        <th className="text-right py-3 px-4">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredDrops.map((drop) => {
+                        const creator = Array.isArray(drop.creator) ? drop.creator[0] : (drop.creator as any)
+                        return (
+                          <tr key={drop.id} className="border-b border-border/50">
+                            <td className="py-3 px-4">
+                              <div>
+                                <p className="font-semibold">{drop.title}</p>
+                                <p className="text-xs text-muted-foreground line-clamp-1">
+                                  {drop.description}
+                                </p>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-sm">{creator?.display_name}</td>
+                            <td className="py-3 px-4">
+                              <span
+                                className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${
+                                  drop.is_active ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground"
+                                }`}
+                              >
+                                {drop.is_active ? "Active" : "Inactive"}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-sm">{drop.view_count || 0}</td>
+                            <td className="py-3 px-4 text-sm">{drop.unlock_count || 0}</td>
+                            <td className="py-3 px-4 text-right space-x-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleToggleDropStatus(drop.id, drop.is_active)}
+                                className="text-xs"
+                              >
+                                {drop.is_active ? "Deactivate" : "Activate"}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteDrop(drop.id)}
+                                className="text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
                 </div>
-
-                <div className="space-y-4">
-                  {drops.map((drop) => (
-                    <div key={drop.id} className="glass flex items-center justify-between rounded-2xl p-4">
-                      <div className="flex items-center gap-4">
-                        {drop.thumbnailUrl ? (
-                          <img
-                            src={drop.thumbnailUrl || "/placeholder.svg"}
-                            alt={drop.title}
-                            className="h-16 w-16 rounded-lg object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-surface">
-                            <Lock className="h-6 w-6 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div>
-                          <h3 className="font-semibold">{drop.title}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            by {drop.creatorName} • {drop.contentType}
-                          </p>
-                          <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Eye className="h-3 w-3" />
-                              {drop.views || 0}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Users className="h-3 w-3" />
-                              {drop.unlocks || 0}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            drop.status === "active"
-                              ? "bg-primary/10 text-primary"
-                              : drop.status === "draft"
-                                ? "bg-muted-foreground/10 text-muted-foreground"
-                                : "bg-accent/10 text-accent"
-                          }`}
-                        >
-                          {drop.status}
-                        </span>
-                        <Link href={`/drops/${drop.id}`}>
-                          <Button variant="outline" size="sm" className="glass bg-transparent">
-                            View
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Moderation Tab */}
-            <TabsContent value="moderation">
-              <div className="glass-strong rounded-3xl p-6">
-                <h2 className="mb-6 text-2xl font-bold">Content Moderation</h2>
-
-                <div className="space-y-4">
-                  {drops
-                    .filter((d) => d.status === "draft")
-                    .map((drop) => (
-                      <div key={drop.id} className="glass rounded-2xl p-4">
-                        <div className="mb-4 flex items-start justify-between">
-                          <div>
-                            <h3 className="mb-1 font-semibold">{drop.title}</h3>
-                            <p className="mb-2 text-sm text-muted-foreground">{drop.description}</p>
-                            <p className="text-xs text-muted-foreground">
-                              Submitted by {drop.creatorName} on {new Date(drop.createdAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <span className="rounded-full bg-yellow-500/10 px-3 py-1 text-xs font-semibold text-yellow-500">
-                            Pending Review
-                          </span>
-                        </div>
-                        <div className="flex gap-3">
-                          <Button size="sm" className="bg-green-500 hover:bg-green-600">
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                            Approve
-                          </Button>
-                          <Button size="sm" variant="outline" className="glass bg-transparent text-red-500">
-                            <XCircle className="mr-2 h-4 w-4" />
-                            Reject
-                          </Button>
-                          <Link href={`/drops/${drop.id}`}>
-                            <Button size="sm" variant="outline" className="glass bg-transparent">
-                              Review
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
-                    ))}
-
-                  {drops.filter((d) => d.status === "draft").length === 0 && (
-                    <div className="py-12 text-center">
-                      <CheckCircle className="mx-auto mb-4 h-12 w-12 text-green-500" />
-                      <h3 className="mb-2 text-lg font-semibold">All caught up!</h3>
-                      <p className="text-muted-foreground">No content pending moderation</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
-    </div>
-  )
-}
-
-function StatCard({
-  icon,
-  label,
-  value,
-  subtitle,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: number
-  subtitle?: string
-}) {
-  return (
-    <div className="glass-strong rounded-2xl p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <div className="rounded-full bg-surface p-3">{icon}</div>
-      </div>
-      <div className="text-3xl font-bold">{value.toLocaleString()}</div>
-      <div className="text-sm text-muted-foreground">{label}</div>
-      {subtitle && <div className="mt-1 text-xs text-muted-foreground">{subtitle}</div>}
-    </div>
-  )
-}
-
-function HealthItem({
-  icon,
-  label,
-  value,
-  status,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: string
-  status: "success" | "warning" | "error"
-}) {
-  return (
-    <div className="flex items-center justify-between rounded-lg border border-border p-4">
-      <div className="flex items-center gap-3">
-        {icon}
-        <span className="font-medium">{label}</span>
-      </div>
-      <span
-        className={`text-sm font-semibold ${
-          status === "success" ? "text-green-500" : status === "warning" ? "text-yellow-500" : "text-red-500"
-        }`}
-      >
-        {value}
-      </span>
     </div>
   )
 }

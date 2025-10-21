@@ -1,181 +1,258 @@
 "use client"
 
-import type React from "react"
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { useAccount } from "wagmi"
+import { useRouter } from "next/navigation"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import { fetchCreatorCoin, formatCurrency, formatNumber } from "@/lib/zora/profile"
 import { AuroraBackground } from "@/components/aurora-background"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
-import { Plus, TrendingUp, Users, Eye, Lock, BarChart3 } from "lucide-react"
-import Link from "next/link"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Loader2, Plus, Users, TrendingUp, Sparkles, Eye } from "lucide-react"
 import { toast } from "sonner"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
+import Link from "next/link"
 
 interface Drop {
   id: string
-  creator_address: string
   title: string
   description: string
-  content_type: 'video' | 'audio' | 'image' | 'text'
-  content_url: string
+  content_type: string
   thumbnail_url?: string
-  status: 'draft' | 'active' | 'archived'
-  views: number
-  unlocks: number
+  required_coin_balance: number
+  required_coin_balance_usd: number
+  view_count: number
+  unlock_count: number
+  is_active: boolean
   created_at: string
 }
 
-interface Stats {
-  total_drops: number
-  total_views: number
-  total_unlocks: number
-  active_drops: number
-}
-
 export default function DashboardPage() {
-  const router = useRouter()
   const { address, isConnected } = useAccount()
+  const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [drops, setDrops] = useState<Drop[]>([])
-  const [stats, setStats] = useState<Stats>({ total_drops: 0, total_views: 0, total_unlocks: 0, active_drops: 0 })
+  const [coinStats, setCoinStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const supabase = getSupabaseBrowserClient()
 
   useEffect(() => {
     if (!isConnected || !address) {
-      router.replace("/onboarding")
+      router.push("/auth")
       return
     }
 
-    const loadData = async () => {
-      setIsLoading(true)
-      try {
-        // Fetch user
-        const { data: userData, error: userError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('wallet_address', address)
-          .single()
+    loadDashboard()
+  }, [isConnected, address, router])
 
-        if (userError || !userData || userData.role !== 'creator') {
-          toast.error("Access denied—complete creator setup first")
-          router.replace("/onboarding/creator")
-          return
-        }
+  const loadDashboard = async () => {
+    if (!address || !supabase) return
 
-        setUser(userData)
+    setIsLoading(true)
 
-        // Fetch stats via RPC
-        const { data: statsData } = await supabase.rpc('get_creator_stats', { creator_addr: address })
-        if (statsData) {
-          setStats(statsData[0])
-        }
+    try {
+      // Fetch user from Supabase
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("*")
+        .eq("wallet_address", address.toLowerCase())
+        .single()
 
-        // Fetch drops
-        const { data: dropsData, error: dropsError } = await supabase
-          .from('drops')
-          .select('*')
-          .eq('creator_address', address)
-          .order('created_at', { ascending: false })
-
-        if (dropsError) {
-          toast.error("Failed to load drops")
-        } else {
-          setDrops(dropsData || [])
-        }
-      } catch (error) {
-        console.error('Dashboard load error:', error)
-        toast.error("Failed to load dashboard")
-        router.replace("/onboarding")
-      } finally {
-        setIsLoading(false)
+      if (userError || !userData) {
+        toast.error("Profile not found. Please sign in with Zora.")
+        router.push("/auth")
+        return
       }
-    }
 
-    loadData()
-  }, [router, address, isConnected, supabase])
+      if (!userData.is_creator) {
+        toast.error("This page is for creators only.")
+        router.push("/explore")
+        return
+      }
+
+      setUser(userData)
+
+      // Fetch creator's drops
+      const { data: dropsData, error: dropsError } = await supabase
+        .from("drops")
+        .select("*")
+        .eq("creator_wallet_address", address.toLowerCase())
+        .order("created_at", { ascending: false })
+
+      if (dropsError) {
+        console.error("Error fetching drops:", dropsError)
+      } else {
+        setDrops(dropsData || [])
+      }
+
+      // Fetch coin stats from Zora
+      if (userData.zora_handle) {
+        const coin = await fetchCreatorCoin(userData.zora_handle)
+        setCoinStats(coin)
+      }
+    } catch (error) {
+      console.error("Dashboard load error:", error)
+      toast.error("Failed to load dashboard")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   if (isLoading) {
     return (
-      <div className="relative min-h-screen">
+      <div className="relative min-h-screen overflow-x-hidden">
         <AuroraBackground />
         <Navigation />
-        <div className="relative z-10 px-4 py-24">
-          <div className="mx-auto max-w-7xl space-y-4">
-            <Skeleton className="h-8 w-64" />
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-48 rounded-2xl" />)}
-            </div>
-          </div>
+        <div className="relative z-10 flex min-h-screen items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       </div>
     )
   }
 
-  if (!user) {
-    return null
-  }
-
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen overflow-x-hidden">
       <AuroraBackground />
       <Navigation />
 
-      <div className="relative z-10 px-4 py-24">
-        <div className="mx-auto max-w-7xl">
+      <div className="relative z-10 px-4 py-24 max-w-full">
+        <div className="mx-auto max-w-7xl w-full space-y-8">
           {/* Header */}
-          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="mb-2 text-4xl font-bold">Creator Dashboard</h1>
-              <p className="text-muted-foreground">Welcome back, {user.display_name}</p>
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Creator Dashboard
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                Welcome back, {user?.display_name || user?.zora_handle}
+              </p>
             </div>
-            <Link href="/dashboard/drops/new">
-              <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-6 py-6 font-bold text-background hover:shadow-glow-primary transition-all">
+            <Link href="/drops/create">
+              <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-8 py-6 text-lg font-bold shadow-glow-primary">
                 <Plus className="mr-2 h-5 w-5" />
                 Create Drop
               </Button>
             </Link>
           </div>
 
-          {/* Stats Grid */}
-          <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard icon={<Lock className="h-6 w-6 text-primary" />} label="Total Drops" value={stats.total_drops} />
-            <StatCard icon={<TrendingUp className="h-6 w-6 text-accent" />} label="Active Drops" value={stats.active_drops} />
-            <StatCard icon={<Eye className="h-6 w-6 text-primary" />} label="Total Views" value={stats.total_views} />
-            <StatCard icon={<Users className="h-6 w-6 text-accent" />} label="Total Unlocks" value={stats.total_unlocks} />
-          </div>
+          {/* Coin Stats */}
+          {coinStats && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card className="glass-strong border-primary/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                    Market Cap
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-foreground">
+                    {formatCurrency(parseFloat(coinStats.marketCap))}
+                  </p>
+                </CardContent>
+              </Card>
 
-          {/* Drops Section */}
-          <div className="glass-strong rounded-3xl p-6">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold">Your Drops</h2>
-              <Link href="/dashboard/drops">
-                <Button variant="outline" className="rounded-full">View All</Button>
-              </Link>
+              <Card className="glass-strong border-accent/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Users className="h-4 w-4 text-accent" />
+                    Holders
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-foreground">
+                    {coinStats.uniqueHolders.toLocaleString()}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-strong border-primary/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    Price/Token
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-foreground">
+                    {formatCurrency(coinStats.pricePerToken)}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-strong border-accent/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Eye className="h-4 w-4 text-accent" />
+                    Total Drops
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-foreground">
+                    {drops.length}
+                  </p>
+                </CardContent>
+              </Card>
             </div>
+          )}
 
+          {/* Drops List */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">Your Drops</h2>
             {drops.length === 0 ? (
-              <div className="py-12 text-center">
-                <Lock className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="mb-2 text-lg font-semibold">No drops yet</h3>
-                <p className="mb-6 text-muted-foreground">Create your first token-gated drop to get started</p>
-                <Link href="/dashboard/drops/new">
-                  <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-6 py-3 font-bold text-background">
-                    <Plus className="mr-2 h-5 w-5" />
-                    Create Your First Drop
-                  </Button>
-                </Link>
-              </div>
+              <Card className="glass-strong border-primary/20">
+                <CardContent className="py-12 text-center">
+                  <Sparkles className="h-12 w-12 text-primary/50 mx-auto mb-4" />
+                  <p className="text-muted-foreground mb-4">
+                    You haven't created any drops yet
+                  </p>
+                  <Link href="/drops/create">
+                    <Button className="rounded-full bg-gradient-to-r from-primary to-accent">
+                      Create Your First Drop
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {drops.slice(0, 6).map((drop) => (
-                  <DropCard key={drop.id} drop={drop} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {drops.map((drop) => (
+                  <Link key={drop.id} href={`/drops/${drop.id}`}>
+                    <Card className="glass-strong border-primary/20 hover:border-primary/40 transition-all group cursor-pointer">
+                      {drop.thumbnail_url && (
+                        <div className="aspect-video overflow-hidden rounded-t-2xl">
+                          <img
+                            src={drop.thumbnail_url}
+                            alt={drop.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
+                        </div>
+                      )}
+                      <CardHeader>
+                        <CardTitle className="line-clamp-1">{drop.title}</CardTitle>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {drop.description}
+                        </p>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Required</span>
+                          <span className="font-semibold text-primary">
+                            {drop.required_coin_balance.toLocaleString()} tokens
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Eye className="h-3 w-3" /> Views
+                          </span>
+                          <span className="font-semibold">{drop.view_count}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Unlocks</span>
+                          <span className="font-semibold text-accent">{drop.unlock_count}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 ))}
               </div>
             )}
@@ -183,74 +260,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
-  )
-}
-
-function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
-  return (
-    <Card className="glass-strong hover:shadow-glow-primary transition-shadow">
-      <CardContent className="p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="rounded-full bg-primary/10 p-3">{icon}</div>
-        </div>
-        <div className="text-3xl font-bold text-foreground">{value.toLocaleString()}</div>
-        <p className="text-sm text-muted-foreground">{label}</p>
-      </CardContent>
-    </Card>
-  )
-}
-
-function DropCard({ drop }: { drop: Drop }) {
-  return (
-    <Link href={`/drops/${drop.id}`} className="block">
-      <Card className="glass-strong group relative overflow-hidden rounded-2xl transition-all hover:shadow-glow-primary cursor-pointer border-2 border-transparent hover:border-primary">
-        {/* Thumbnail */}
-        {drop.thumbnail_url ? (
-          <div className="aspect-video overflow-hidden">
-            <img
-              src={drop.thumbnail_url}
-              alt={drop.title}
-              className="h-full w-full object-cover transition-transform group-hover:scale-105"
-            />
-          </div>
-        ) : (
-          <div className="flex aspect-video items-center justify-center bg-muted">
-            <Lock className="h-12 w-12 text-muted-foreground" />
-          </div>
-        )}
-
-        {/* Content */}
-        <CardContent className="p-4">
-          <div className="mb-2 flex items-center justify-between">
-            <span
-              className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                drop.status === "active"
-                  ? "bg-primary/10 text-primary"
-                  : drop.status === "draft"
-                    ? "bg-muted-foreground/10 text-muted-foreground"
-                    : "bg-accent/10 text-accent"
-              }`}
-            >
-              {drop.status}
-            </span>
-            <span className="text-xs text-muted-foreground capitalize">{drop.content_type}</span>
-          </div>
-
-          <CardTitle className="mb-2 line-clamp-1 font-semibold group-hover:text-primary transition-colors">{drop.title}</CardTitle>
-          <CardDescription className="mb-4 line-clamp-2 text-sm">{drop.description}</CardDescription>
-
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Eye className="h-3 w-3" />
-              {drop.views} views
-            </span>
-            <span className="flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              {drop.unlocks} unlocks
-            </span>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
   )
 }

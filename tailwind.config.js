@@ -1,6 +1,10 @@
 module.exports = {
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-geist-sans)'],
+        mono: ['var(--font-geist-mono)'],
+      },
       colors: {
         subtle: 'oklch(40% 0 0)', // Mid-gray for secondary text
       },
