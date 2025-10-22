@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useAccount, useDisconnect, useConnect } from "wagmi"
-import { coinbaseWallet } from '@wagmi/connectors'
+import { usePrivy, useWallets } from "@privy-io/react-auth"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -12,17 +11,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Copy } from "lucide-react"
-import { toast } from "sonner" // Or your toast lib; install if needed: npm i sonner
+import { Copy, LogOut } from "lucide-react"
+import { toast } from "sonner"
 
 const truncateAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`
 
 export function ConnectWallet() {
-  const { address, isConnected } = useAccount()
-  const { disconnect } = useDisconnect()
-  const { connect } = useConnect()
+  const { ready, authenticated, login, logout } = usePrivy()
+  const { wallets } = useWallets()
   const [copied, setCopied] = useState(false)
-  const [isConnecting, setIsConnecting] = useState(false)
+
+  // Get the active wallet address
+  const activeWallet = wallets[0]
+  const address = activeWallet?.address
 
   const handleCopy = async () => {
     if (address) {
@@ -33,45 +34,47 @@ export function ConnectWallet() {
     }
   }
 
-  const handleConnect = async () => {
-    setIsConnecting(true)
-    try {
-      await connect({ connector: coinbaseWallet({ appName: "Revel" }) })
-    } catch (error) {
-      toast.error("Connection failed—try again?")
-    } finally {
-      setIsConnecting(false)
-    }
-  }
-
-  const handleDisconnect = () => {
-    disconnect()
+  const handleDisconnect = async () => {
+    await logout()
     toast.success("Wallet disconnected")
   }
 
-  if (!isConnected) {
+  // Show loading state while Privy initializes
+  if (!ready) {
     return (
       <Button
-        onClick={handleConnect}
-        disabled={isConnecting}
+        disabled
         className="rounded-full bg-primary px-6 py-2 font-semibold text-background transition-all hover:bg-primary-hover hover:glow-primary disabled:opacity-50"
       >
-        <span>{isConnecting ? "Connecting..." : "Sign in with Base"}</span>
+        <span>Loading...</span>
       </Button>
     )
   }
 
+  // Show connect button if not authenticated
+  if (!authenticated || !address) {
+    return (
+      <Button
+        onClick={login}
+        className="rounded-full bg-primary px-6 py-2 font-semibold text-background transition-all hover:bg-primary-hover hover:glow-primary"
+      >
+        <span>Sign In With Base</span>
+      </Button>
+    )
+  }
+
+  // Show connected wallet dropdown
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button className="rounded-full bg-primary px-6 py-2 font-semibold text-background transition-all hover:bg-primary-hover hover:glow-primary">
-          <span>{truncateAddress(address!)}</span>
+          <span>{truncateAddress(address)}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 z-[60]" align="end" sideOffset={4}>
         <DropdownMenuLabel className="flex flex-col space-y-1">
           <span className="text-sm font-medium leading-none">Connected</span>
-          <p className="text-xs text-muted-foreground">{address ? truncateAddress(address) : ""}</p>
+          <p className="text-xs text-muted-foreground">{truncateAddress(address)}</p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleCopy}>
@@ -79,7 +82,8 @@ export function ConnectWallet() {
           {copied ? "Copied!" : "Copy address"}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleDisconnect} variant="destructive">
+        <DropdownMenuItem onClick={handleDisconnect} className="text-destructive focus:text-destructive">
+          <LogOut className="mr-2 h-4 w-4" />
           Disconnect
         </DropdownMenuItem>
       </DropdownMenuContent>

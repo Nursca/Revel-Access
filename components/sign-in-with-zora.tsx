@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAccount, useSignMessage } from "wagmi"
+import { usePrivy, useWallets } from "@privy-io/react-auth"
+import { useSignMessage } from "@privy-io/react-auth"
 import { useRouter } from "next/navigation"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { ConnectWallet } from "@/components/connect-wallet"
@@ -30,8 +31,9 @@ interface ZoraProfile {
 }
 
 export function SignInWithZora() {
-  const { address, isConnected } = useAccount()
-  const { signMessageAsync } = useSignMessage()
+  const { ready, authenticated } = usePrivy()
+  const { wallets } = useWallets()
+  const { signMessage } = useSignMessage()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [zoraHandle, setZoraHandle] = useState("")
@@ -40,12 +42,16 @@ export function SignInWithZora() {
   const [errorMessage, setErrorMessage] = useState("")
   const supabase = getSupabaseBrowserClient()
 
+  const activeWallet = wallets[0]
+  const address = activeWallet?.address
+  const isConnected = authenticated && !!address
+
   useEffect(() => {
     setMounted(true)
   }, [])
 
   const handleSignIn = async () => {
-    if (!isConnected || !address) {
+    if (!isConnected || !address || !activeWallet) {
       toast.error("Please connect your Base wallet first")
       return
     }
@@ -118,12 +124,26 @@ export function SignInWithZora() {
 
       console.log("✅ Wallet verified")
 
-      // Sign message
+      // Sign message using Privy's useSignMessage hook
       const message = `Sign in to Revel Access\n\nZora Handle: ${profile.handle}\nWallet: ${address}\nTimestamp: ${Date.now()}`
       
-      let signature: string
+      let signatureResult: string
       try {
-        signature = await signMessageAsync({ message })
+        const uiOptions = {
+          title: "Sign In to Revel",
+          description: "Sign this message to verify your Zora profile",
+          buttonText: "Sign Message"
+        }
+        
+        const result = await signMessage(
+          { message },
+          { 
+            uiOptions,
+            address: activeWallet.address
+          }
+        )
+        
+        signatureResult = result.signature
         console.log("✅ Message signed")
       } catch (signError) {
         console.error("❌ Signature rejected:", signError)
@@ -155,7 +175,7 @@ export function SignInWithZora() {
         zora_creator_coin_address: profile.creatorCoin?.address || null,
         is_creator: isCreator,
         zora_profile_data: profile,
-        signature,
+        signature: signatureResult,
         last_sign_in: new Date().toISOString(),
       }
 
@@ -183,9 +203,9 @@ export function SignInWithZora() {
         
         setTimeout(() => {
           if (isCreator) {
-            router.push("/dashboard")  // Creators go to dashboard
+            router.push("/dashboard")
           } else {
-            router.push("/explore")    // Fans go to explore
+            router.push("/explore")
           }
         }, 1500)
       }
@@ -199,7 +219,7 @@ export function SignInWithZora() {
     }
   }
 
-  if (!mounted) {
+  if (!mounted || !ready) {
     return (
       <div className="w-full max-w-md">
         <div className="glass-strong rounded-2xl p-6 space-y-6 border-2 border-primary/20 min-h-[400px] flex items-center justify-center">
@@ -229,7 +249,6 @@ export function SignInWithZora() {
       <div className="glass-strong rounded-2xl p-6 space-y-6 border-2 border-primary/20">
         {step === "input" && (
           <>
-            {/* Wallet Connection - Top Priority */}
             {!isConnected ? (
               <div className="space-y-4">
                 <div className="glass rounded-xl p-6 border border-primary/20 bg-primary/5 text-center space-y-4">
@@ -245,7 +264,6 @@ export function SignInWithZora() {
               </div>
             ) : (
               <>
-                {/* Connected Wallet Status */}
                 <div className="space-y-2">
                   <Label className="text-xs text-muted-foreground">Connected Wallet</Label>
                   <div className="glass rounded-lg p-3 border border-accent/20 bg-accent/5">
@@ -255,7 +273,6 @@ export function SignInWithZora() {
                   </div>
                 </div>
 
-                {/* Zora Username Input */}
                 <div className="space-y-2">
                   <Label htmlFor="zoraHandle">
                     Zora Username <span className="text-primary">*</span>
@@ -282,14 +299,13 @@ export function SignInWithZora() {
                       href="https://zora.co"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary hover:underline inline-flex items-center gap-1"
+                      className="text-primary hover:underline inline-flex items-center gap-1 ml-2"
                     >
                       Create one <ExternalLink className="h-3 w-3" />
                     </a>
                   </p>
                 </div>
 
-                {/* Error Message */}
                 {errorMessage && (
                   <div className="glass rounded-lg p-4 border border-destructive/30 bg-destructive/5">
                     <div className="flex items-start gap-3">
@@ -299,7 +315,6 @@ export function SignInWithZora() {
                   </div>
                 )}
 
-                {/* Submit Button */}
                 <Button
                   onClick={handleSignIn}
                   disabled={isLoading || !isConnected || !zoraHandle.trim()}
@@ -346,7 +361,6 @@ export function SignInWithZora() {
         )}
       </div>
 
-      {/* Info Box */}
       <div className="glass rounded-xl p-4 border border-accent/20 bg-gradient-to-br from-primary/5 to-accent/5">
         <p className="text-xs text-muted-foreground">
           <strong className="text-foreground">Why verify with Zora?</strong><br />
