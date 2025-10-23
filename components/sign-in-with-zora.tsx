@@ -333,17 +333,7 @@ export function SignInWithZora() {
             )}
           </>
         )}
-// Add to your auth page during development
-<Button 
-  onClick={() => {
-    localStorage.clear()
-    sessionStorage.clear()
-    window.location.reload()
-  }}
-  variant="outline"
->
-  Clear Cache & Reload
-</Button>
+        
         {step === "verify" && (
           <div className="text-center py-8 space-y-4">
             <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
