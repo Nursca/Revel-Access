@@ -64,7 +64,7 @@ export function Navigation() {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50 hidden md:block">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/50 hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -107,7 +107,7 @@ export function Navigation() {
               {isConnected && (user || localUser) ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="glass border-primary/30 gap-2 h-10">
+                    <Button variant="outline" className="bg-card border-primary/30 gap-2 h-10">
                       {(user || localUser).profile_image ? (
                         <img 
                           src={(user || localUser).profile_image} 
@@ -120,7 +120,7 @@ export function Navigation() {
                       <span className="max-w-[120px] truncate font-semibold">{(user || localUser).display_name}</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="glass-strong border-primary/30 w-64">
+                  <DropdownMenuContent align="end" className="bg-card border-primary/30 w-64">
                     <DropdownMenuLabel>
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-semibold">{(user || localUser).display_name}</p>
@@ -167,7 +167,7 @@ export function Navigation() {
       </nav>
 
       {/* Mobile Top Bar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50 md:hidden">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/50 md:hidden">
         <div className="px-4 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="relative w-8 h-8">
@@ -185,7 +185,7 @@ export function Navigation() {
           {isConnected && (user || localUser) ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="glass rounded-full">
+                <Button variant="ghost" size="icon" className="bg-card rounded-full">
                   {(user || localUser).profile_image ? (
                     <img 
                       src={(user || localUser).profile_image} 
@@ -197,7 +197,7 @@ export function Navigation() {
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="glass-strong border-primary/30 w-64">
+              <DropdownMenuContent align="end" className="bg-card border-primary/30 w-64">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-semibold">{(user || localUser).display_name}</p>
@@ -231,7 +231,7 @@ export function Navigation() {
       </nav>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/50 md:hidden pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border/50 md:hidden pb-safe">
         <div className="grid grid-cols-5 h-16">
           {navLinks.filter(link => link.show).slice(0, 5).map((link) => {
             const isActive = pathname === link.href
