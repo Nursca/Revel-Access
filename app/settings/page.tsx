@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAccount } from "wagmi"
+import { usePrivy, useWallets } from "@privy-io/react-auth"
 import { useRouter } from "next/navigation"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { AuroraBackground } from "@/components/aurora-background"
@@ -13,19 +13,25 @@ import { toast } from "sonner"
 import Link from "next/link"
 
 export default function SettingsPage() {
-  const { address, isConnected } = useAccount()
+  const { ready, authenticated } = usePrivy()
+  const { wallets } = useWallets()
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const supabase = getSupabaseBrowserClient()
 
+  const address = wallets[0]?.address
+  const isConnected = authenticated && !!address
+
   useEffect(() => {
+    if (!ready) return
+    
     if (!isConnected || !address) {
       router.push("/auth")
       return
     }
     loadUser()
-  }, [isConnected, address, router])
+  }, [ready, isConnected, address, router])
 
   const loadUser = async () => {
     if (!address || !supabase) return

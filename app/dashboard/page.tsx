@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAccount } from "wagmi"
+import { usePrivy, useWallets } from "@privy-io/react-auth"
 import { useRouter } from "next/navigation"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { fetchCreatorCoin, formatCurrency, formatNumber } from "@/lib/zora/profile"
@@ -28,7 +28,8 @@ interface Drop {
 }
 
 export default function DashboardPage() {
-  const { address, isConnected } = useAccount()
+  const { ready, authenticated } = usePrivy()
+  const { wallets } = useWallets()
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [drops, setDrops] = useState<Drop[]>([])
@@ -36,14 +37,19 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const supabase = getSupabaseBrowserClient()
 
+  const address = wallets[0]?.address
+  const isConnected = authenticated && !!address
+
   useEffect(() => {
+    if (!ready) return
+    
     if (!isConnected || !address) {
       router.push("/auth")
       return
     }
 
     loadDashboard()
-  }, [isConnected, address, router])
+  }, [ready, isConnected, address, router])
 
   const loadDashboard = async () => {
     if (!address || !supabase) return
