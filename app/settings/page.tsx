@@ -85,7 +85,7 @@ export default function SettingsPage() {
         <div className="mx-auto max-w-4xl w-full space-y-8">
           {/* Header */}
           <div className="text-center space-y-2">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+            <h1 className="text-3xl md:text-4xl font-bold text-primary">
               Settings
             </h1>
             <p className="text-muted-foreground">

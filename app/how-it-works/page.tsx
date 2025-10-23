@@ -29,7 +29,7 @@ export default function HowItWorksPage() {
 
           {/* For Creators */}
           <section className="space-y-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-center">For Creators</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-center text-primary">For Creators</h2>
             <div className="grid md:grid-cols-3 gap-8">
               <Card className="glass-strong border-primary/20">
                 <CardContent className="pt-8 space-y-4">
@@ -71,7 +71,7 @@ export default function HowItWorksPage() {
 
           {/* For Fans */}
           <section className="space-y-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-center">For Fans</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-center text-primary">For Fans</h2>
             <div className="grid md:grid-cols-3 gap-8">
               <Card className="glass-strong border-accent/20">
                 <CardContent className="pt-8 space-y-4">

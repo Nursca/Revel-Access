@@ -77,7 +77,7 @@ export function Navigation() {
                   </div>
                 </div>
               </div>
-              <span className="text-2xl font-bold text-foreground">
+              <span className="text-2xl font-bold text-primary">
                 Revel
               </span>
             </Link>

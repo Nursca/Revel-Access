@@ -144,15 +144,15 @@ export default function LandingPage() {
             </div>
 
             <h1 className="text-6xl md:text-8xl font-bold leading-[1.1] animate-fade-in tracking-tight" style={{ animationDelay: '0.2s' }}>
-              <span className="text-foreground">
-                Turn Your Zora Coins
+              <span className="text-primary">
+                Turn Your Zora Creator Coins
               </span>
               <br />
-              <span className="text-foreground">Into Access Keys</span>
+              <span className="text-primary">Into Access Keys</span>
             </h1>
 
             <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              Revel Access lets creators share exclusive content with their community using Zora Creator Coins as token gates. 
+              Build global paying communities with creators coin
               <span className="block mt-2 font-semibold text-muted-foreground">No new tokens. No code. Simple on-chain access.</span>
             </p>
 
@@ -172,7 +172,7 @@ export default function LandingPage() {
         <section className="px-4 py-28">
           <div className="mx-auto max-w-7xl">
             <div className="text-center mb-16">
-              <h2 className="text-foreground text-4xl md:text-5xl font-bold mb-4">Why Creators Choose Revel</h2>
+              <h2 className="text-primary text-4xl md:text-5xl font-bold mb-4">Why Creators Choose Revel</h2>
               <p className="text-xl text-muted-foreground">Built for the next generation of creator economy</p>
             </div>
 
@@ -220,7 +220,7 @@ export default function LandingPage() {
         <section className="px-4 py-28">
           <div className="mx-auto max-w-6xl space-y-16">
             <div className="text-center space-y-5">
-              <h2 className="text-5xl md:text-6xl font-bold text-foreground">
+              <h2 className="text-5xl md:text-6xl font-bold text-primary">
                 How It Works
               </h2>
               <p className="text-xl md:text-2xl text-muted-foreground">
@@ -277,7 +277,7 @@ export default function LandingPage() {
                   </p>
                   {authenticated && userProfile ? (
                     <Link href={userProfile.is_creator ? "/dashboard" : "/explore"}>
-                      <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-14 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
+                      <Button className="rounded-full bg-gradient-to-r from-primary to-accent border border-border px-14 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
                         {userProfile.is_creator ? "Go to Dashboard" : "Explore Drops"}
                         <ArrowRight className="ml-2 h-7 w-7" />
                       </Button>

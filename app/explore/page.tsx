@@ -148,7 +148,7 @@ export default function ExplorePage() {
               <Sparkles className="h-4 w-4 text-foreground animate-pulse" />
               <span className="text-sm font-semibold text-foreground">Discover Drops</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+            <h1 className="text-4xl md:text-5xl font-bold text-primary">
               Explore Token-Gated Content
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
