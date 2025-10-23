@@ -1,107 +1,18 @@
 "use client"
 
-import { usePrivy, useWallets } from "@privy-io/react-auth"
+import { useAccount } from "wagmi"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { AuroraBackground } from "@/components/aurora-background"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Sparkles, Lock, Users, Zap, ArrowRight, Loader2 } from "lucide-react"
+import { Sparkles, Lock, Users, Zap, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
 export default function LandingPage() {
-  const { ready, authenticated } = usePrivy()
-  const { wallets } = useWallets()
+  const { isConnected } = useAccount()
   const router = useRouter()
-  const [userProfile, setUserProfile] = useState<{ is_creator: boolean } | null>(null)
-  const [profileLoading, setProfileLoading] = useState(false)
-  const supabase = getSupabaseBrowserClient()
-
-  const address = wallets[0]?.address
-
-  useEffect(() => {
-    async function fetchProfile() {
-      if (authenticated && address && supabase) {
-        setProfileLoading(true)
-        try {
-          const { data } = await supabase
-            .from("users")
-            .select("is_creator")
-            .eq("wallet_address", address.toLowerCase())
-            .single()
-          
-          if (data) {
-            setUserProfile(data)
-          }
-        } catch (error) {
-          console.error("Error fetching profile:", error)
-        } finally {
-          setProfileLoading(false)
-        }
-      } else {
-        setUserProfile(null)
-      }
-    }
-    fetchProfile()
-  }, [authenticated, address, supabase])
-
-  // Determine CTA button text and destination
-  const getCtaButton = () => {
-    if (!ready) {
-      return (
-        <Button disabled className="rounded-full bg-gradient-to-r from-primary to-accent px-12 py-8 text-xl font-bold">
-          <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-          Loading...
-        </Button>
-      )
-    }
-
-    if (authenticated && userProfile) {
-      const destination = userProfile.is_creator ? "/dashboard" : "/explore"
-      const text = userProfile.is_creator ? "Go to Dashboard" : "Explore Drops"
-      
-      return (
-        <Link href={destination}>
-          <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-12 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
-            {text}
-            <ArrowRight className="ml-2 h-6 w-6" />
-          </Button>
-        </Link>
-      )
-    }
-
-    if (authenticated && profileLoading) {
-      return (
-        <Button disabled className="rounded-full bg-gradient-to-r from-primary to-accent px-12 py-8 text-xl font-bold">
-          <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-          Loading Profile...
-        </Button>
-      )
-    }
-
-    if (authenticated && !userProfile) {
-      return (
-        <Link href="/auth">
-          <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-12 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
-            Complete Sign In
-            <ArrowRight className="ml-2 h-6 w-6" />
-          </Button>
-        </Link>
-      )
-    }
-
-    return (
-      <Link href="/auth">
-        <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-12 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
-          Get Started
-          <Sparkles className="ml-2 h-6 w-6" />
-        </Button>
-      </Link>
-    )
-  }
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -154,7 +65,21 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-5 justify-center items-center animate-fade-in pt-4" style={{ animationDelay: '0.4s' }}>
-              {getCtaButton()}
+              {isConnected ? (
+                <Link href="/auth">
+                  <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-12 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
+                    Sign In with Zora
+                    <ArrowRight className="ml-2 h-6 w-6" />
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/auth">
+                  <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-12 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
+                    Get Started
+                    <Sparkles className="ml-2 h-6 w-6" />
+                  </Button>
+                </Link>
+              )}
               <Link href="/explore">
                 <Button variant="outline" className="rounded-full glass border-primary/30 px-12 py-8 text-xl font-semibold hover:bg-primary/5 hover:border-primary/50 transition-all">
                   Explore Drops
@@ -271,21 +196,12 @@ export default function LandingPage() {
                   <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed">
                     Join creators who are building ownership-based communities on Base.
                   </p>
-                  {authenticated && userProfile ? (
-                    <Link href={userProfile.is_creator ? "/dashboard" : "/explore"}>
-                      <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-14 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
-                        {userProfile.is_creator ? "Go to Dashboard" : "Explore Drops"}
-                        <ArrowRight className="ml-2 h-7 w-7" />
-                      </Button>
-                    </Link>
-                  ) : (
-                    <Link href="/auth">
-                      <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-14 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
-                        Get Started Free
-                        <ArrowRight className="ml-2 h-7 w-7" />
-                      </Button>
-                    </Link>
-                  )}
+                  <Link href="/auth">
+                    <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-14 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
+                      Get Started Free
+                      <ArrowRight className="ml-2 h-7 w-7" />
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </Card>

@@ -11,8 +11,6 @@
   "dependencies": {
     "@coinbase/onchainkit": "^1.1.1",
     "@hookform/resolvers": "^3.10.0",
-    "@privy-io/react-auth": "^3.4.0",
-    "@privy-io/wagmi": "^2.0.1",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
     "@radix-ui/react-aspect-ratio": "1.1.1",
