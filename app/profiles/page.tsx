@@ -40,9 +40,7 @@ export default function ProfilesPage() {
 
   const loadProfiles = async () => {
     if (!supabase) return
-
     setIsLoading(true)
-
     try {
       const { data, error } = await supabase
         .from("users")
@@ -67,15 +65,9 @@ export default function ProfilesPage() {
 
   const filterProfiles = () => {
     let filtered = profiles
+    if (filterType === "creators") filtered = filtered.filter(p => p.is_creator)
+    else if (filterType === "fans") filtered = filtered.filter(p => !p.is_creator)
 
-    // Filter by type
-    if (filterType === "creators") {
-      filtered = filtered.filter(p => p.is_creator)
-    } else if (filterType === "fans") {
-      filtered = filtered.filter(p => !p.is_creator)
-    }
-
-    // Filter by search
     if (searchQuery.trim()) {
       filtered = filtered.filter(p =>
         p.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -104,7 +96,7 @@ export default function ProfilesPage() {
       <AuroraBackground />
       <Navigation />
 
-      <div className="relative z-10 px-4 py-24 max-w-full">
+      <div className="relative z-10 px-3 sm:px-4 py-20 sm:py-24 max-w-full">
         <div className="mx-auto max-w-7xl w-full space-y-8">
           {/* Header */}
           <div className="text-center space-y-4">
@@ -112,32 +104,32 @@ export default function ProfilesPage() {
               <Users className="h-4 w-4 text-primary animate-pulse" />
               <span className="text-sm font-semibold text-primary">Community</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Discover Profiles
             </h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
               Explore creators and fans in the Revel community
             </p>
           </div>
 
           {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 placeholder="Search profiles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="glass border-primary/30 focus:border-primary pl-12 h-12"
+                className="glass border-primary/30 focus:border-primary pl-12 h-11 sm:h-12 text-sm sm:text-base"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap justify-center sm:justify-start gap-2">
               <Button
                 variant="outline"
                 onClick={() => setFilterType("all")}
-                className={`glass ${
-                  filterType === "all" 
-                    ? "border-primary bg-primary/10 text-primary" 
+                className={`glass text-sm sm:text-base ${
+                  filterType === "all"
+                    ? "border-primary bg-primary/10 text-primary"
                     : "border-primary/30"
                 }`}
               >
@@ -146,9 +138,9 @@ export default function ProfilesPage() {
               <Button
                 variant="outline"
                 onClick={() => setFilterType("creators")}
-                className={`glass ${
-                  filterType === "creators" 
-                    ? "border-primary bg-primary/10 text-primary" 
+                className={`glass text-sm sm:text-base ${
+                  filterType === "creators"
+                    ? "border-primary bg-primary/10 text-primary"
                     : "border-primary/30"
                 }`}
               >
@@ -157,9 +149,9 @@ export default function ProfilesPage() {
               <Button
                 variant="outline"
                 onClick={() => setFilterType("fans")}
-                className={`glass ${
-                  filterType === "fans" 
-                    ? "border-accent bg-accent/10 text-accent" 
+                className={`glass text-sm sm:text-base ${
+                  filterType === "fans"
+                    ? "border-accent bg-accent/10 text-accent"
                     : "border-accent/30"
                 }`}
               >
@@ -173,68 +165,78 @@ export default function ProfilesPage() {
             <Card className="glass-strong border-primary/20">
               <CardContent className="py-12 text-center">
                 <Users className="h-12 w-12 text-primary/50 mx-auto mb-4" />
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground text-sm sm:text-base">
                   {searchQuery ? "No profiles found matching your search" : "No profiles yet"}
                 </p>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div
+              className="
+                grid 
+                grid-cols-1 
+                sm:grid-cols-2 
+                md:grid-cols-3 
+                lg:grid-cols-4 
+                xl:grid-cols-5 
+                gap-4 
+                sm:gap-6
+              "
+            >
               {filteredProfiles.map((profile) => (
-                <Card 
-                  key={profile.wallet_address} 
-                  className="glass-strong border-primary/20 hover:border-primary/40 transition-all group h-full"
+                <Card
+                  key={profile.wallet_address}
+                  className="glass-strong border-primary/20 hover:border-primary/40 transition-all group h-full rounded-2xl sm:rounded-3xl"
                 >
-                  <CardContent className="pt-6 space-y-4">
-                    {/* Avatar */}
+                  <CardContent className="pt-6 space-y-4 sm:space-y-5">
                     <Link href={`/profiles/${profile.zora_handle}`} className="block">
                       <div className="relative cursor-pointer">
                         {profile.profile_image ? (
                           <img
                             src={profile.profile_image}
                             alt={profile.display_name}
-                            className="w-20 h-20 rounded-full mx-auto border-2 border-primary group-hover:scale-110 transition-transform"
+                            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mx-auto border-2 border-primary group-hover:scale-110 transition-transform duration-300"
                           />
                         ) : (
-                          <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto border-2 border-primary group-hover:scale-110 transition-transform">
+                          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary/20 flex items-center justify-center mx-auto border-2 border-primary group-hover:scale-110 transition-transform duration-300">
                             <Users className="h-10 w-10 text-primary" />
                           </div>
                         )}
                         {profile.is_creator && (
-                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary text-white text-xs font-semibold">
+                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary text-white text-[10px] sm:text-xs font-semibold">
                             <Sparkles className="h-3 w-3" />
                             Creator
                           </div>
                         )}
                       </div>
 
-                      {/* Info */}
-                      <div className="text-center space-y-2 mt-4">
-                        <h3 className="font-bold text-lg line-clamp-1">{profile.display_name}</h3>
-                        <p className="text-sm text-muted-foreground">@{profile.zora_handle}</p>
+                      <div className="text-center space-y-1.5 mt-4">
+                        <h3 className="font-bold text-base sm:text-lg line-clamp-1">
+                          {profile.display_name}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground">@{profile.zora_handle}</p>
                         {profile.bio && (
-                          <p className="text-xs text-muted-foreground line-clamp-2">
+                          <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-2">
                             {profile.bio}
                           </p>
                         )}
                       </div>
                     </Link>
 
-                    {/* Zora Link - Standalone, not nested */}
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full glass border-accent/30 hover:border-accent"
+                      className="w-full glass border-accent/30 hover:border-accent text-xs sm:text-sm"
                       asChild
                     >
                       <a
                         href={`https://zora.co/${profile.zora_handle}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2"
+                        className="inline-flex items-center gap-1 sm:gap-2"
                       >
                         View on Zora
-                        <ExternalLink className="h-3 w-3" />
+                        <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
                       </a>
                     </Button>
                   </CardContent>

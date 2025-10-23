@@ -1,4 +1,5 @@
-import { getProfile, getProfileCoins } from "@zoralabs/coins-sdk"
+import { getProfile, getProfileCoins, getCoin } from "@zoralabs/coins-sdk" // Added getCoin
+import { base } from "viem/chains" // New: For chain ID
 
 export interface ZoraProfile {
   id: string
@@ -66,8 +67,21 @@ export async function fetchZoraProfile(identifier: string): Promise<ZoraProfile 
 
 export async function fetchCreatorCoin(identifier: string): Promise<CreatorCoin | null> {
   try {
-    const response = await getProfileCoins({ identifier: identifier.toLowerCase().trim(), count: 1 })
-    const coin = response?.data?.profile?.createdCoins?.edges?.[0]?.node as any
+    // Get profile to find the main creatorCoin address
+    const profileResponse = await getProfile({ identifier: identifier.toLowerCase().trim() })
+    const profile = profileResponse?.data?.profile as any
+
+    if (!profile?.creatorCoin?.address) {
+      console.log("No main creator coin for handle:", identifier)
+      return null
+    }
+
+    // Get full details for the main coin
+    const coinResponse = await getCoin({
+      address: profile.creatorCoin.address,
+      chain: base.id // Base (8453)
+    })
+    const coin = coinResponse.data?.zora20Token as any
 
     if (!coin) return null
 

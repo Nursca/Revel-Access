@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useAccount } from "wagmi"
 import { useRouter, usePathname } from "next/navigation"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import { useUser } from "@/components/providers" // New: Global user (replaces local fetch)
 import { ConnectWallet } from "@/components/connect-wallet"
 import { Button } from "@/components/ui/button"
 import {
@@ -32,41 +32,22 @@ export function Navigation() {
   const { address, isConnected } = useAccount()
   const router = useRouter()
   const pathname = usePathname()
-  const [user, setUser] = useState<any>(null)
-  const supabase = getSupabaseBrowserClient()
+  const { user } = useUser() // New: Use global user (no local state/fetch needed)
+  const [localUser, setLocalUser] = useState<any>(null) // Keep for logout/legacy
 
+  // New: Sync global user to local state for backward compat
   useEffect(() => {
-    if (isConnected && address && supabase) {
-      loadUser()
-    } else {
-      setUser(null)
+    if (user) {
+      setLocalUser(user)
     }
-  }, [isConnected, address, supabase])
-
-  const loadUser = async () => {
-    if (!address || !supabase) return
-
-    try {
-      const { data } = await supabase
-        .from("users")
-        .select("*")
-        .eq("wallet_address", address.toLowerCase())
-        .single()
-
-      if (data) {
-        setUser(data)
-      }
-    } catch (error) {
-      console.error("Error loading user:", error)
-    }
-  }
+  }, [user])
 
   const handleLogout = () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("revel_user_authenticated")
       localStorage.removeItem("revel_user_role")
     }
-    setUser(null)
+    setLocalUser(null)
     router.push("/")
   }
 
@@ -75,8 +56,8 @@ export function Navigation() {
     { href: "/explore", label: "Explore", icon: Compass, show: true },
     { href: "/profiles", label: "Profiles", icon: Users, show: true },
     { href: "/how-it-works", label: "How It Works", icon: Sparkles, show: true },
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, show: user?.is_creator },
-    { href: "/drops/create", label: "Create", icon: PlusCircle, show: user?.is_creator },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, show: user?.is_creator || localUser?.is_creator },
+    { href: "/drops/create", label: "Create", icon: PlusCircle, show: user?.is_creator || localUser?.is_creator },
     { href: "/settings", label: "Settings", icon: Settings, show: true }
   ]
 
@@ -123,27 +104,27 @@ export function Navigation() {
 
             {/* Desktop Auth */}
             <div className="flex items-center gap-4">
-              {isConnected && user ? (
+              {isConnected && (user || localUser) ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="glass border-primary/30 gap-2 h-10">
-                      {user.profile_image ? (
+                      {(user || localUser).profile_image ? (
                         <img 
-                          src={user.profile_image} 
-                          alt={user.display_name}
+                          src={(user || localUser).profile_image} 
+                          alt={(user || localUser).display_name}
                           className="w-6 h-6 rounded-full"
                         />
                       ) : (
                         <User className="h-4 w-4" />
                       )}
-                      <span className="max-w-[120px] truncate font-semibold">{user.display_name}</span>
+                      <span className="max-w-[120px] truncate font-semibold">{(user || localUser).display_name}</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="glass-strong border-primary/30 w-64">
                     <DropdownMenuLabel>
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-semibold">{user.display_name}</p>
-                        <p className="text-xs text-muted-foreground">@{user.zora_handle}</p>
+                        <p className="text-sm font-semibold">{(user || localUser).display_name}</p>
+                        <p className="text-xs text-muted-foreground">@{(user || localUser).zora_handle}</p>
                         <p className="text-xs font-mono text-muted-foreground">
                           {address?.slice(0, 6)}...{address?.slice(-4)}
                         </p>
@@ -151,12 +132,12 @@ export function Navigation() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-border/50" />
                     <DropdownMenuItem asChild>
-                      <Link href={`/profiles/${user.zora_handle}`} className="cursor-pointer">
+                      <Link href={`/profiles/${(user || localUser).zora_handle}`} className="cursor-pointer">
                         <User className="mr-2 h-4 w-4" />
                         View Profile
                       </Link>
                     </DropdownMenuItem>
-                    {user.is_creator && (
+                    {(user || localUser).is_creator && (
                       <DropdownMenuItem asChild>
                         <Link href="/dashboard" className="cursor-pointer">
                           <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -201,14 +182,14 @@ export function Navigation() {
             </span>
           </Link>
 
-          {isConnected && user ? (
+          {isConnected && (user || localUser) ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="glass rounded-full">
-                  {user.profile_image ? (
+                  {(user || localUser).profile_image ? (
                     <img 
-                      src={user.profile_image} 
-                      alt={user.display_name}
+                      src={(user || localUser).profile_image} 
+                      alt={(user || localUser).display_name}
                       className="w-8 h-8 rounded-full"
                     />
                   ) : (
@@ -219,13 +200,13 @@ export function Navigation() {
               <DropdownMenuContent align="end" className="glass-strong border-primary/30 w-64">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-semibold">{user.display_name}</p>
-                    <p className="text-xs text-muted-foreground">@{user.zora_handle}</p>
+                    <p className="text-sm font-semibold">{(user || localUser).display_name}</p>
+                    <p className="text-xs text-muted-foreground">@{(user || localUser).zora_handle}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href={`/profiles/${user.zora_handle}`}>
+                  <Link href={`/profiles/${(user || localUser).zora_handle}`}>
                     <User className="mr-2 h-4 w-4" />
                     View Profile
                   </Link>

@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useAccount } from "wagmi"
+import { useWallets } from "@privy-io/react-auth"
 import { useRouter } from "next/navigation"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { fetchCreatorCoin, formatCurrency } from "@/lib/zora/profile"
+import { useUser } from "@/components/providers"
 import { AuroraBackground } from "@/components/aurora-background"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
@@ -16,9 +17,9 @@ import { Loader2, Upload, X, Sparkles, DollarSign, Coins } from "lucide-react"
 import { toast } from "sonner"
 
 export default function CreateDropPage() {
-  const { address, isConnected } = useAccount()
+  const { wallets } = useWallets()
   const router = useRouter()
-  const [user, setUser] = useState<any>(null)
+  const { user, loading: userLoading, refetch } = useUser()
   const [coinStats, setCoinStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [uploadLoading, setUploadLoading] = useState(false)
@@ -37,39 +38,61 @@ export default function CreateDropPage() {
   const thumbnailInputRef = useRef<HTMLInputElement>(null)
   const supabase = getSupabaseBrowserClient()
 
+  const address = wallets[0]?.address
+  const isConnected = !!wallets.length && !!address
+
   useEffect(() => {
+    console.log("[DEBUG] CreateDrop useEffect - isConnected:", isConnected, "address:", address, "userLoading:", userLoading, "user:", user)
+
     if (!isConnected || !address) {
+      console.log("[DEBUG] Redirect to /auth - no connection")
       router.push("/auth")
       return
     }
-    loadUserData()
-  }, [isConnected, address, router])
+    if (userLoading) {
+      console.log("[DEBUG] Waiting for user load")
+      return
+    }
 
-  const loadUserData = async () => {
-    if (!address || !supabase) return
+    if (!user) {
+      console.log("[DEBUG] No user, retrying fetch...")
+      refetch()
+      return
+    }
+
+    if (!user.zora_handle || !user.is_creator) {
+      console.log("[DEBUG] Redirect - user invalid:", { hasHandle: !!user.zora_handle, isCreator: user.is_creator })
+      toast.error("Only verified creators can create drops")
+      router.push(user.is_creator ? "/explore" : "/auth")
+      return
+    }
+
+    console.log("[DEBUG] User valid, loading coin for handle:", user.zora_handle)
+    loadCoinStats()
+  }, [isConnected, address, user, userLoading, router, refetch])
+
+  const loadCoinStats = async () => {
+    if (!user?.zora_handle) {
+      console.log("[DEBUG] No handle for coin load")
+      return
+    }
 
     try {
-      const { data: userData, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("wallet_address", address.toLowerCase())
-        .single()
+      console.log("[DEBUG] Calling fetchCreatorCoin for:", user.zora_handle)
+      const coin = await fetchCreatorCoin(user.zora_handle)
+      console.log("[DEBUG] Coin fetched:", coin)
 
-      if (error || !userData || !userData.is_creator) {
-        toast.error("Only creators can create drops")
-        router.push("/explore")
+      if (!coin) {
+        console.log("[DEBUG] No coin returned")
+        toast.error("No creator coin found. Create one on Zora first.")
+        router.push("/dashboard")
         return
       }
-
-      setUser(userData)
-
-      if (userData.zora_handle) {
-        const coin = await fetchCreatorCoin(userData.zora_handle)
-        setCoinStats(coin)
-      }
+      setCoinStats(coin)
+      console.log("[DEBUG] Coin set to state")
     } catch (error) {
-      console.error("Error loading user:", error)
-      toast.error("Failed to load profile")
+      console.error("Error loading coin stats:", error)
+      toast.error("Failed to load your coin")
       router.push("/dashboard")
     }
   }
@@ -84,7 +107,6 @@ export default function CreateDropPage() {
     setUploadLoading(true)
 
     try {
-      // Create preview
       const reader = new FileReader()
       reader.onloadend = () => {
         const result = reader.result as string
@@ -96,10 +118,9 @@ export default function CreateDropPage() {
       }
       reader.readAsDataURL(file)
 
-      // Upload to Supabase
       const fileExt = file.name.split(".").pop()
-      const fileName = `${address}-${Date.now()}.${fileExt}`
-      const filePath = `drops/${fileName}`
+      const fileName = address + "-" + Date.now() + "." + fileExt
+      const filePath = "drops/" + fileName
 
       const { error: uploadError } = await supabase.storage
         .from("drop-media")
@@ -220,7 +241,8 @@ export default function CreateDropPage() {
     }
   }
 
-  if (!user || !coinStats) {
+  if (userLoading || !user) {
+    console.log("[DEBUG] Showing loader - state:", { userLoading, hasUser: !!user })
     return (
       <div className="relative min-h-screen overflow-x-hidden">
         <AuroraBackground />
@@ -231,6 +253,8 @@ export default function CreateDropPage() {
       </div>
     )
   }
+
+  const isCoinLoading = !coinStats
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -284,7 +308,6 @@ export default function CreateDropPage() {
                     />
                   </div>
 
-                  {/* Content Type */}
                   <div className="space-y-2">
                     <Label>Content Type <span className="text-primary">*</span></Label>
                     <div className="grid grid-cols-2 gap-3">
@@ -292,11 +315,7 @@ export default function CreateDropPage() {
                         type="button"
                         variant="outline"
                         onClick={() => setFormData({ ...formData, content_type: "image" })}
-                        className={`glass h-12 ${
-                          formData.content_type === "image"
-                            ? "border-primary bg-primary/10"
-                            : "border-primary/30"
-                        }`}
+                        className={"glass h-12 " + (formData.content_type === "image" ? "border-primary bg-primary/10" : "border-primary/30")}
                       >
                         Image
                       </Button>
@@ -304,18 +323,13 @@ export default function CreateDropPage() {
                         type="button"
                         variant="outline"
                         onClick={() => setFormData({ ...formData, content_type: "text" })}
-                        className={`glass h-12 ${
-                          formData.content_type === "text"
-                            ? "border-primary bg-primary/10"
-                            : "border-primary/30"
-                        }`}
+                        className={"glass h-12 " + (formData.content_type === "text" ? "border-primary bg-primary/10" : "border-primary/30")}
                       >
                         Text
                       </Button>
                     </div>
                   </div>
 
-                  {/* Image Upload */}
                   {formData.content_type === "image" && (
                     <div className="space-y-2">
                       <Label>Content Image <span className="text-primary">*</span></Label>
@@ -379,7 +393,6 @@ export default function CreateDropPage() {
                 </CardContent>
               </Card>
 
-              {/* Token Gate */}
               <Card className="glass-strong border-accent/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -388,7 +401,6 @@ export default function CreateDropPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Gate Type Toggle */}
                   <div className="space-y-2">
                     <Label>Set Requirement By</Label>
                     <div className="grid grid-cols-2 gap-3">
@@ -396,11 +408,7 @@ export default function CreateDropPage() {
                         type="button"
                         variant="outline"
                         onClick={() => setGateType("tokens")}
-                        className={`glass h-12 ${
-                          gateType === "tokens"
-                            ? "border-accent bg-accent/10"
-                            : "border-accent/30"
-                        }`}
+                        className={"glass h-12 " + (gateType === "tokens" ? "border-accent bg-accent/10" : "border-accent/30")}
                       >
                         <Coins className="mr-2 h-4 w-4" />
                         Tokens
@@ -409,9 +417,7 @@ export default function CreateDropPage() {
                         type="button"
                         variant="outline"
                         onClick={() => setGateType("usd")}
-                        className={`glass h-12 ${
-                          gateType === "usd" ? "border-accent bg-accent/10" : "border-accent/30"
-                        }`}
+                        className={"glass h-12 " + (gateType === "usd" ? "border-accent bg-accent/10" : "border-accent/30")}
                       >
                         <DollarSign className="mr-2 h-4 w-4" />
                         USD Value
@@ -419,7 +425,6 @@ export default function CreateDropPage() {
                     </div>
                   </div>
 
-                  {/* Amount Input */}
                   <div className="space-y-2">
                     <Label htmlFor="required_amount">
                       {gateType === "tokens" ? "Minimum Tokens" : "Minimum USD Value"}
@@ -472,27 +477,38 @@ export default function CreateDropPage() {
                   <CardTitle className="text-base">Your Coin</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Symbol</p>
-                    <p className="font-bold text-primary">{coinStats.symbol}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Holders</p>
-                    <p className="font-semibold">{coinStats.uniqueHolders}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Market Cap</p>
-                    <p className="font-semibold">
-                      {formatCurrency(parseFloat(coinStats.marketCap))}
-                    </p>
-                  </div>
+                  {isCoinLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-4 w-4 animate-spin mr-2 text-primary" />
+                      <span className="text-sm text-muted-foreground">Loading coin...</span>
+                    </div>
+                  ) : coinStats ? (
+                    <>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Symbol</p>
+                        <p className="font-bold text-primary">{coinStats.symbol}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Holders</p>
+                        <p className="font-semibold">{coinStats.uniqueHolders}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Market Cap</p>
+                        <p className="font-semibold">
+                          {formatCurrency(parseFloat(coinStats.marketCap))}
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No coin loaded</p>
+                  )}
                 </CardContent>
               </Card>
 
               {/* Publish Button */}
               <Button
                 onClick={handleSubmit}
-                disabled={isLoading || uploadLoading}
+                disabled={isLoading || uploadLoading || !coinStats}
                 className="w-full rounded-full bg-gradient-to-r from-primary to-accent py-6 text-lg font-bold shadow-glow-primary"
               >
                 {isLoading ? (
