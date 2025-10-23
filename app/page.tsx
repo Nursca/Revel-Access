@@ -145,14 +145,14 @@ export default function LandingPage() {
 
             <h1 className="text-6xl md:text-8xl font-bold leading-[1.1] animate-fade-in tracking-tight" style={{ animationDelay: '0.2s' }}>
               <span className="text-primary">
-                Turn Your Zora Creator Coins
+                Build global paying communities
               </span>
               <br />
-              <span className="text-primary">Into Access Keys</span>
+              <span className="text-primary">with creators coins</span>
             </h1>
 
             <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              Build global paying communities with creators coin
+              Own Access. Empower Creators. Build Culture Onchain
               <span className="block mt-2 font-semibold text-muted-foreground">No new tokens. No code. Simple on-chain access.</span>
             </p>
 
