@@ -144,11 +144,11 @@ export default function ExplorePage() {
         <div className="mx-auto max-w-7xl w-full space-y-8">
           {/* Header */}
           <div className="text-center space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/30">
-              <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-              <span className="text-sm font-semibold text-primary">Exclusive Drops</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/20 border border-foreground/20">
+              <Sparkles className="h-4 w-4 text-foreground animate-pulse" />
+              <span className="text-sm font-semibold text-foreground">Discover Drops</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground">
               Explore Token-Gated Content
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -164,7 +164,7 @@ export default function ExplorePage() {
                 placeholder="Search drops or creators..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="glass border-primary/30 focus:border-primary pl-12 h-14 text-base"
+                className="bg-background border-foreground/20 focus:border-foreground pl-12 h-14 text-base"
               />
             </div>
           </div>
@@ -187,7 +187,7 @@ export default function ExplorePage() {
 
                 return (
                   <Link key={drop.id} href={`/drops/${drop.id}`}>
-                    <Card className="glass-strong border-primary/20 hover:border-primary/40 transition-all group cursor-pointer h-full flex flex-col">
+                    <Card className="bg-background border-foreground/20 hover:border-foreground/40 transition-all group cursor-pointer h-full flex flex-col">
                       {/* Thumbnail */}
                       {drop.thumbnail_url ? (
                         <div className="aspect-video overflow-hidden rounded-t-2xl relative">
@@ -203,7 +203,7 @@ export default function ExplorePage() {
                           )}
                         </div>
                       ) : (
-                        <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-t-2xl flex items-center justify-center">
+                        <div className="aspect-video bg-background/10 rounded-t-2xl flex items-center justify-center">
                           {hasAccess ? (
                             <Unlock className="h-12 w-12 text-primary" />
                           ) : (

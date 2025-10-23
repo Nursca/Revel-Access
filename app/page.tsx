@@ -52,7 +52,7 @@ export default function LandingPage() {
   const getCtaButton = () => {
     if (!ready) {
       return (
-        <Button disabled className="rounded-full bg-gradient-to-r from-primary to-accent px-12 py-8 text-xl font-bold">
+        <Button disabled className="rounded-full bg-background text-foreground px-12 py-8 text-xl font-bold">
           <Loader2 className="mr-2 h-6 w-6 animate-spin" />
           Loading...
         </Button>
@@ -65,7 +65,7 @@ export default function LandingPage() {
       
       return (
         <Link href={destination}>
-          <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-12 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
+          <Button className="rounded-full bg-background text-foreground px-12 py-8 text-xl font-bold hover:scale-105 transition-all hover:shadow-md">
             {text}
             <ArrowRight className="ml-2 h-6 w-6" />
           </Button>
@@ -75,7 +75,7 @@ export default function LandingPage() {
 
     if (authenticated && profileLoading) {
       return (
-        <Button disabled className="rounded-full bg-gradient-to-r from-primary to-accent px-12 py-8 text-xl font-bold">
+        <Button disabled className="rounded-full bg-background text-foreground px-12 py-8 text-xl font-bold">
           <Loader2 className="mr-2 h-6 w-6 animate-spin" />
           Loading Profile...
         </Button>
@@ -85,7 +85,7 @@ export default function LandingPage() {
     if (authenticated && !userProfile) {
       return (
         <Link href="/auth">
-          <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-12 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
+          <Button className="rounded-full bg-background text-foreground px-12 py-8 border border-border text-xl font-bold hover:scale-105 transition-all hover:shadow-md">
             Complete Sign In
             <ArrowRight className="ml-2 h-6 w-6" />
           </Button>
@@ -95,7 +95,9 @@ export default function LandingPage() {
 
     return (
       <Link href="/auth">
-        <Button className="rounded-full bg-gradient-to-r from-primary to-accent px-12 py-8 text-xl font-bold shadow-glow-primary hover:scale-105 transition-all hover:shadow-2xl">
+        <Button 
+        variant="outline"
+        className="rounded-full bg-background/20 text-foreground px-12 py-8 text-xl font-bold hover:scale-105 transition-all hover:shadow-md">
           Get Started
           <Sparkles className="ml-2 h-6 w-6" />
         </Button>
@@ -115,8 +117,9 @@ export default function LandingPage() {
             {/* Logo with Shine Effect */}
             <div className="flex justify-center mb-8 animate-fade-in">
               <div className="relative group">
-                {/* Glowing background */}
-                <div className="absolute inset-0 -m-6 bg-gradient-to-r from-primary via-accent to-primary rounded-full blur-3xl opacity-40 group-hover:opacity-60 animate-pulse transition-opacity" />
+
+                {/*Glowing background*/}
+                <div className="absolute inset-0 -m-6 bg-background rounded-full blur-3xl opacity-40 group-hover:opacity-60 animate-pulse transition-opacity" />
                 
                 {/* Logo */}
                 <div className="relative">
@@ -125,23 +128,23 @@ export default function LandingPage() {
                     alt="Revel"
                     width={140}
                     height={140}
-                    className="relative z-10 drop-shadow-2xl"
+                    className="relative z-10"
                   />
                   {/* Shimmer overlay */}
                   <div className="absolute inset-0 overflow-hidden rounded-full pointer-events-none">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent animate-shimmer" style={{ width: '200%', height: '200%' }} />
+                    <div className="absolute inset-0 bg-background/20" />
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass border border-primary/30 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-              <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-              <span className="text-sm font-semibold text-primary">Powered by Zora & Base</span>
+              <Sparkles className="h-4 w-4 text-foreground animate-pulse" />
+              <span className="text-sm font-semibold text-foreground">Powered by Zora & Base</span>
             </div>
 
             <h1 className="text-6xl md:text-8xl font-bold leading-[1.1] animate-fade-in tracking-tight" style={{ animationDelay: '0.2s' }}>
-              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              <span className="text-foreground">
                 Turn Your Zora Coins
               </span>
               <br />
@@ -150,13 +153,14 @@ export default function LandingPage() {
 
             <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.3s' }}>
               Revel Access lets creators share exclusive content with their community using Zora Creator Coins as token gates. 
-              <span className="block mt-2 font-semibold text-foreground">No new tokens. No code. Simple on-chain access.</span>
+              <span className="block mt-2 font-semibold text-muted-foreground">No new tokens. No code. Simple on-chain access.</span>
             </p>
 
             <div className="flex flex-col sm:flex-row gap-5 justify-center items-center animate-fade-in pt-4" style={{ animationDelay: '0.4s' }}>
               {getCtaButton()}
               <Link href="/explore">
-                <Button variant="outline" className="rounded-full glass border-primary/30 px-12 py-8 text-xl font-semibold hover:bg-primary/5 hover:border-primary/50 transition-all">
+                <Button variant="outline" className="rounded-full bg-background/20 
+                text-foreground px-12 py-8 text-xl font-semibold hover:scale-105 transition-all hover:shadow-md">
                   Explore Drops
                 </Button>
               </Link>
@@ -168,14 +172,14 @@ export default function LandingPage() {
         <section className="px-4 py-28">
           <div className="mx-auto max-w-7xl">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">Why Creators Choose Revel</h2>
+              <h2 className="text-foreground text-4xl md:text-5xl font-bold mb-4">Why Creators Choose Revel</h2>
               <p className="text-xl text-muted-foreground">Built for the next generation of creator economy</p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
-              <Card className="glass-strong border-primary/20 hover:border-primary/50 transition-all group hover:scale-105 hover:shadow-glow-primary">
+              <Card className="bg-background/20 hover:bg-background/30 transition-all group hover:scale-105">
                 <CardContent className="pt-10 pb-8 px-8 space-y-5">
-                  <div className="inline-flex rounded-full bg-primary/10 p-5 group-hover:bg-primary/20 transition-colors">
+                  <div className="inline-flex rounded-full bg-background/20 p-5 group-hover:bg-background/30 transition-colors">
                     <Lock className="h-10 w-10 text-primary" />
                   </div>
                   <h3 className="text-2xl font-bold">Token-Gated Drops</h3>
@@ -185,10 +189,10 @@ export default function LandingPage() {
                 </CardContent>
               </Card>
 
-              <Card className="glass-strong border-accent/20 hover:border-accent/50 transition-all group hover:scale-105 hover:shadow-glow-accent">
+              <Card className="bg-background/20 hover:bg-background/30 transition-all group hover:scale-105">
                 <CardContent className="pt-10 pb-8 px-8 space-y-5">
-                  <div className="inline-flex rounded-full bg-accent/10 p-5 group-hover:bg-accent/20 transition-colors">
-                    <Zap className="h-10 w-10 text-accent" />
+                  <div className="inline-flex rounded-full bg-background/20 p-5 group-hover:bg-background/30 transition-colors">
+                    <Zap className="h-10 w-10 text-primary" />
                   </div>
                   <h3 className="text-2xl font-bold">Instant Verification</h3>
                   <p className="text-muted-foreground text-base leading-relaxed">
@@ -216,7 +220,7 @@ export default function LandingPage() {
         <section className="px-4 py-28">
           <div className="mx-auto max-w-6xl space-y-16">
             <div className="text-center space-y-5">
-              <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <h2 className="text-5xl md:text-6xl font-bold text-foreground">
                 How It Works
               </h2>
               <p className="text-xl md:text-2xl text-muted-foreground">

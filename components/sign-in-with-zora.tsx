@@ -222,8 +222,8 @@ export function SignInWithZora() {
   if (!mounted || !ready) {
     return (
       <div className="w-full max-w-md">
-        <div className="glass-strong rounded-2xl p-6 space-y-6 border-2 border-primary/20 min-h-[400px] flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="bg-background rounded-2xl p-6 space-y-6 border-2 border-foreground/20 min-h-[400px] flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-foreground" />
         </div>
       </div>
     )
@@ -233,11 +233,11 @@ export function SignInWithZora() {
     <div className="w-full max-w-md space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/30">
-          <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-          <span className="text-sm font-semibold text-primary">Powered by Zora</span>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/20 border border-foreground/20">
+          <Sparkles className="h-4 w-4 text-foreground animate-pulse" />
+          <span className="text-sm font-semibold text-foreground">Powered by Zora</span>
         </div>
-        <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+        <h2 className="text-2xl md:text-3xl font-bold text-foreground">
           Sign In With Zora
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -246,7 +246,7 @@ export function SignInWithZora() {
       </div>
 
       {/* Main Form */}
-      <div className="glass-strong rounded-2xl p-6 space-y-6 border-2 border-primary/20">
+      <div className="bg-background rounded-2xl p-6 space-y-6 border-2 border-foreground/20">
         {step === "input" && (
           <>
             {!isConnected ? (

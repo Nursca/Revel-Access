@@ -70,14 +70,14 @@ export function Navigation() {
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group">
               <div className="relative w-10 h-10">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-accent opacity-20 group-hover:opacity-30 transition-opacity blur-xl" />
-                <div className="relative w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent p-[2px]">
+                <div className="absolute inset-0 rounded-full bg-background opacity-20 group-hover:opacity-30 transition-opacity blur-xl" />
+                <div className="relative w-10 h-10 rounded-full bg-background p-0.5">
                   <div className="w-full h-full rounded-full bg-background flex items-center justify-center">
                     <img src="/revel-logo.png" alt="revel logo" />
                   </div>
                 </div>
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <span className="text-2xl font-bold text-foreground">
                 Revel
               </span>
             </Link>
@@ -96,7 +96,7 @@ export function Navigation() {
                 >
                   {link.label}
                   {pathname === link.href && (
-                    <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-accent" />
+                    <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-foreground/20" />
                   )}
                 </Link>
               ))}
@@ -107,7 +107,7 @@ export function Navigation() {
               {isConnected && (user || localUser) ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="bg-card border-primary/30 gap-2 h-10">
+                    <Button variant="outline" className="bg-background border-primary/30 gap-2 h-10">
                       {(user || localUser).profile_image ? (
                         <img 
                           src={(user || localUser).profile_image} 
@@ -120,7 +120,7 @@ export function Navigation() {
                       <span className="max-w-[120px] truncate font-semibold">{(user || localUser).display_name}</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-card border-primary/30 w-64">
+                  <DropdownMenuContent align="end" className="bg-background border-primary/30 w-64">
                     <DropdownMenuLabel>
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-semibold">{(user || localUser).display_name}</p>
@@ -171,13 +171,13 @@ export function Navigation() {
         <div className="px-4 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="relative w-8 h-8">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-accent p-[2px]">
+              <div className="w-8 h-8 rounded-full bg-background border-2 border-foreground/20 p-0.5">
                 <div className="w-full h-full rounded-full bg-background flex items-center justify-center">
                   <img src="/revel-logo.png" alt="revel logo" />
                 </div>
               </div>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <span className="text-xl font-bold text-foreground">
               Revel
             </span>
           </Link>

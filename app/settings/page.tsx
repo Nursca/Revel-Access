@@ -85,7 +85,7 @@ export default function SettingsPage() {
         <div className="mx-auto max-w-4xl w-full space-y-8">
           {/* Header */}
           <div className="text-center space-y-2">
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground">
               Settings
             </h1>
             <p className="text-muted-foreground">
@@ -94,10 +94,10 @@ export default function SettingsPage() {
           </div>
 
           {/* Profile Info (Read-Only) */}
-          <Card className="glass-strong border-primary/20">
+          <Card className="bg-background border-foreground/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
+                <User className="h-5 w-5 text-foreground" />
                 Profile Information
               </CardTitle>
             </CardHeader>

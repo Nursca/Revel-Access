@@ -16,11 +16,11 @@ export function GenesisOrb() {
     >
       {/* Glow effect */}
       {isHovered && (
-        <div className="absolute -inset-2 animate-pulse rounded-full bg-gradient-to-r from-primary to-accent opacity-50 blur-xl" />
+        <div className="absolute -inset-2 animate-pulse rounded-full bg-background opacity-50" />
       )}
 
       {/* Button */}
-      <button className="relative flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-8 py-4 font-bold text-background shadow-lg transition-transform hover:scale-105 cursor-pointer">
+      <button className="relative flex items-center gap-2 rounded-full bg-background text-foreground px-8 py-4 font-bold transition-transform hover:scale-105 cursor-pointer">
         <Sparkles className="h-5 w-5" />
         Start Creating
       </button>
